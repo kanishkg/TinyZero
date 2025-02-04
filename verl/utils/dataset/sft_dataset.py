@@ -84,7 +84,7 @@ class SFTDataset(Dataset):
             dataframe = pd.read_parquet(parquet_file)
             dataframes.append(dataframe)
         self.dataframe = pd.concat(dataframes)
-        self.prompts = self.dataframe[self.prompt_key]
+        self.prompts = self.dataframe[self.prompt_key[0] if len(self.prompt_key) == 1 else self.prompt_key]
         for key in self.prompt_dict_keys:
             # type(x): pandas.core.series.Series
             # type(x[0]): numpy.ndarray
@@ -95,7 +95,7 @@ class SFTDataset(Dataset):
                 print(f'self.prompts={self.prompts}')
                 raise
         self.prompts = self.prompts.tolist()
-        self.responses = self.dataframe[self.response_key]
+        self.responses = self.dataframe[self.response_key[0] if len(self.response_key) == 1 else self.response_key]
         for key in self.response_dict_keys:
             try:
                 self.responses = self.responses.apply(lambda x: series_to_item(x)[key], axis=1)
@@ -114,10 +114,11 @@ class SFTDataset(Dataset):
         response = self.responses[item]
 
         # apply chat template
-        prompt_chat = [{'role': 'user', 'content': prompt}]
+        # prompt_chat = [{'role': 'user', 'content': prompt}]
 
         # string
-        prompt_chat_str = tokenizer.apply_chat_template(prompt_chat, add_generation_prompt=True, tokenize=False)
+        # prompt_chat_str = tokenizer.apply_chat_template(prompt_chat, add_generation_prompt=True, tokenize=False)
+        prompt_chat_str = prompt
         response_chat_str = response + tokenizer.eos_token
 
         # tokenize
