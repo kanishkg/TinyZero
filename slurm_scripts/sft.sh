@@ -64,7 +64,6 @@ for condition in "${conditions[@]}"; do
     trainer.default_local_dir="${save_dir}" \
     trainer.project_name="${project_name}" \
     trainer.experiment_name="${experiment_name}" \
-    trainer.entity="cocolab" \
     trainer.total_epochs="${total_epochs}" \
     trainer.logger="${logger}"
 
