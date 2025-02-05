@@ -19,11 +19,6 @@ conda activate zero
 # List of dataset conditions
 conditions=(
   "negative_control"
-  "backtracking_verification"
-  "backtracking_backward"
-  "backtracking_subgoal"
-  "only_backtracking"
-  "all_strategies"
 )
 
 # Base path for dataset files
