@@ -6,10 +6,8 @@ from vllm import LLM, SamplingParams
 from datasets import load_dataset
 from verl.utils.reward_score.countdown import compute_score
 from tqdm import tqdm
-
 import torch
 import re
-import torch.multiprocessing as mp
 
 def main():
     parser = argparse.ArgumentParser(
@@ -19,18 +17,20 @@ def main():
         "--ckpt",
         type=str,
         required=True,
-        help="Path to the checkpoint directory for vLLM.",
     )
     parser.add_argument(
         "--dataset",
         type=str,
         required=True,
-        help="Path to the HF parquet dataset file.",
+    )
+    parser.add_argument(
+        "--temperature",
+        type=float,
+        default=0.5,
     )
     args = parser.parse_args()
     ckpt_dir = args.ckpt
     dataset_path = args.dataset
-
     # Initialize the vLLM model from the checkpoint (using LLM instead of LLMEngine).
     llm = LLM(
         model=ckpt_dir,
@@ -41,15 +41,13 @@ def main():
     )
     # Retrieve the tokenizer from the vLLM model.
     # tokenizer = llm.get_tokenizer()
-
     # Set up sampling parameters with stop tokens.
     sampling_params = SamplingParams(
         max_tokens=1024,
-        temperature=1.0,
+        temperature=args.temperature,
     )
-
     # Load the parquet dataset.
-    dataset = load_dataset("parquet", data_files=dataset_path, split="train")
+    dataset = load_dataset("parquet", data_files=dataset_path)
     # List to hold all result records.
     results = []
     # Iterate over the dataset examples.
@@ -82,10 +80,8 @@ def main():
     # Save the results to a JSON file in the checkpoint directory.
     output_path = os.path.join(ckpt_dir, "responses.jsonl")
     with open(output_path, "w") as f:
-        json.dump(results, f, indent=2)
+        json.dump(results, f, indent=4)
     print(f"Saved responses and scores to {output_path}")
 
 if __name__ == "__main__":
-    mp.set_start_method('spawn')
     main()
-
