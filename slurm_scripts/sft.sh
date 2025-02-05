@@ -47,7 +47,7 @@ for condition in "${conditions[@]}"; do
   train_file="${base_data_path}/${condition}/train.parquet"
   val_file="${base_data_path}/${condition}/test.parquet"
 
-  experiment_name="countdown-sft-qwen-2-5-3b-${condition}"
+  experiment_name="countdown-sft-${model_name}-${condition}"
   save_dir="${default_local_dir}/${condition}"
 
   echo "Running training for condition: ${condition}"
@@ -69,6 +69,7 @@ for condition in "${conditions[@]}"; do
     trainer.default_local_dir="${save_dir}" \
     trainer.project_name="${project_name}" \
     trainer.experiment_name="${experiment_name}" \
+    trainer.entity="cocolab" \
     trainer.total_epochs="${total_epochs}" \
     trainer.logger="${logger}"
 
