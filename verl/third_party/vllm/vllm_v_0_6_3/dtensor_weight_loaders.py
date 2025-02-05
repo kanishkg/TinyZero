@@ -72,7 +72,7 @@ def gptbigcode_dtensor_load_weights(actor_weights: Dict, vllm_model: nn.Module):
         weight_loader = getattr(param, "weight_loader", default_weight_loader)
         weight_loader(param, local_loaded_weight.to(dtype=param.dtype))
         
-def olmo_load_weights(actor_weights: Dict, vllm_model: nn.Module)
+def olmo_load_weights(actor_weights: Dict, vllm_model: nn.Module):
     stacked_params_mapping = [
         # (param_name, shard_name, shard_id)
         ("qkv_proj", "q_proj", "q"),
@@ -82,7 +82,7 @@ def olmo_load_weights(actor_weights: Dict, vllm_model: nn.Module)
         ("gate_up_proj", "up_proj", 1),
     ]
     params_dict = dict(vllm_model.named_parameters(remove_duplicate=False))
-    for name, loaded_weight in weights:
+    for name, loaded_weight in actor_weights.items():
         if "rotary_emb.inv_freq" in name:
             continue
         if ("rotary_emb.cos_cached" in name
@@ -119,7 +119,7 @@ def olmo_load_weights(actor_weights: Dict, vllm_model: nn.Module)
             param = params_dict[name]
             weight_loader = getattr(param, "weight_loader",
                                     default_weight_loader)
-            weight_loader(param, local_loaded_weight.to(dtype=param.dtype), shard_id)
+            weight_loader(param, local_loaded_weight.to(dtype=param.dtype))
 
 
 def starcoder2_dtensor_load_weights(actor_weights: Dict, vllm_model: nn.Module):
