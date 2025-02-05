@@ -24,7 +24,6 @@ pip install vllm==0.6.3 # or you can install 0.5.4, 0.4.2 and 0.3.1
 pip install ray
 
 # verl
-cd verl
 pip install -e .
 
 # flash attention 2
