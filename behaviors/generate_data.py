@@ -47,7 +47,7 @@ def main():
         temperature=args.temperature,
     )
     # Load the parquet dataset.
-    dataset = load_dataset("parquet", data_files=dataset_path, split="train")
+    dataset = load_dataset("parquet", data_files=dataset_path)
     # List to hold all result records.
     results = []
     # Iterate over the dataset examples.
@@ -80,7 +80,7 @@ def main():
     # Save the results to a JSON file in the checkpoint directory.
     output_path = os.path.join(ckpt_dir, "responses.jsonl")
     with open(output_path, "w") as f:
-        json.dump(results, f, indent=2)
+        json.dump(results, f, indent=4)
     print(f"Saved responses and scores to {output_path}")
 
 if __name__ == "__main__":
