@@ -71,6 +71,55 @@ def gptbigcode_dtensor_load_weights(actor_weights: Dict, vllm_model: nn.Module):
         param = params_dict[name]
         weight_loader = getattr(param, "weight_loader", default_weight_loader)
         weight_loader(param, local_loaded_weight.to(dtype=param.dtype))
+        
+def olmo_load_weights(actor_weights: Dict, vllm_model: nn.Module)
+    stacked_params_mapping = [
+        # (param_name, shard_name, shard_id)
+        ("qkv_proj", "q_proj", "q"),
+        ("qkv_proj", "k_proj", "k"),
+        ("qkv_proj", "v_proj", "v"),
+        ("gate_up_proj", "gate_proj", 0),
+        ("gate_up_proj", "up_proj", 1),
+    ]
+    params_dict = dict(vllm_model.named_parameters(remove_duplicate=False))
+    for name, loaded_weight in weights:
+        if "rotary_emb.inv_freq" in name:
+            continue
+        if ("rotary_emb.cos_cached" in name
+                or "rotary_emb.sin_cached" in name):
+            # Models trained using ColossalAI may include these tensors in
+            # the checkpoint. Skip them.
+            continue
+        # With tie_word_embeddings, we can skip lm_head.weight
+        # The weight might appear unnecessarily in the files if the model is
+        # processed with quantization, LoRA, fine-tuning, etc.
+        if vllm_model.config.tie_word_embeddings and "lm_head.weight" in name:
+            continue
+        for (param_name, weight_name, shard_id) in stacked_params_mapping:
+            if weight_name not in name:
+                continue
+            name = name.replace(weight_name, param_name)
+            # Skip loading extra bias for GPTQ models.
+            if name.endswith(".bias") and name not in params_dict:
+                continue
+            if is_pp_missing_parameter(name, vllm_model):
+                continue
+            local_loaded_weight = redistribute_dtensor(param_name=name, loaded_weights=loaded_weight)
+            param = params_dict[name]
+            weight_loader = param.weight_loader
+            weight_loader(param, local_loaded_weight.to(dtype=param.dtype), shard_id)
+            break
+        else:
+            # Skip loading extra bias for GPTQ models.
+            if name.endswith(".bias") and name not in params_dict:
+                continue
+            if is_pp_missing_parameter(name, vllm_model):
+                continue
+            local_loaded_weight = redistribute_dtensor(param_name=name, loaded_weights=loaded_weight)
+            param = params_dict[name]
+            weight_loader = getattr(param, "weight_loader",
+                                    default_weight_loader)
+            weight_loader(param, local_loaded_weight.to(dtype=param.dtype), shard_id)
 
 
 def starcoder2_dtensor_load_weights(actor_weights: Dict, vllm_model: nn.Module):
@@ -355,6 +404,7 @@ __MODEL_DTENSOR_WEIGHT_LOADER_REGISTRY__ = {
     "Qwen2ForCausalLM": qwen2_dtensor_weight_loader,
     "DeepseekV2ForCausalLM": deepseekv2_dtensor_weight_loader,
     "Qwen2VLForConditionalGeneration": qwen2vl_dtensor_weight_loader,
+    'OlmoForCausalLM': olmo_load_weights,
 }
 
 
