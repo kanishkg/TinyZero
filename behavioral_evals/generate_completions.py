@@ -49,21 +49,27 @@ def main():
     # Load the parquet dataset.
     dataset = load_dataset("parquet", data_files=dataset_path)
     # List to hold all result records.
-    results = []
     # Iterate over the dataset examples.
+    prompts = []
+    gts = []
     for example in tqdm(dataset, desc="Generating responses"):
         # Extract the prompt.
         prompt = example["prompt"][0]["content"]
         # Extract the ground truth (for scoring) from the reward_model field.
         ground_truth = example["reward_model"]["ground_truth"]
+        gts.append(ground_truth)
         # Extra information from the example (e.g., index and data source).
         extra_info = example.get("extra_info", {})
         index = extra_info.get("index", None)
         data_source = example.get("data_source", "")
         # Generate a response using vLLM.
-        responses = llm.generate([prompt], sampling_params=sampling_params)
+        prompts.append(prompt)
+    responses = llm.generate(prompts, sampling_params=sampling_params)
+
+    results = []
+    for ground_truth, prompt, response in zip(gts, prompts, responses):
         # Access the first generation from the response.
-        generated_text = responses[0].outputs[0].text.strip()
+        generated_text = response.outputs[0].text.strip()
         generated_text = f"Assistant:\n{generated_text}"
         # Compute the reward score.
         score = compute_score(generated_text, ground_truth, format_score=0., score=1.)
