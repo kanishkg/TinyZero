@@ -381,7 +381,6 @@ async def main():
                 'avg_subgoals': metrics['subgoal_count'] / num_problems,
                 'avg_backwards': metrics['backward_count'] / num_problems
             }
-            breakpoint()
             os.makedirs(args.output_dir, exist_ok=True)
             # For synchronous mode, we use a fixed step value of 1.
             detailed_path = os.path.join(args.output_dir, f"evaluation_step1.json")
@@ -418,8 +417,6 @@ async def main():
             
     except Exception as e:
         print(f"An error occurred: {str(e)}")
-        if args.mode == 'batch' and os.path.exists(batch_input_file):
-            os.remove(batch_input_file)
 
 if __name__ == "__main__":
     asyncio.run(main())
