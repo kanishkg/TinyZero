@@ -13,11 +13,11 @@ flags.DEFINE_string('user', 'Asap7772', 'User to push the dataset to')
 FLAGS = flags.FLAGS
 
 PROMPT_LOC_DICT = {
-    'backtracking': '/home/anikait.singh/TinyZero/pretraining_analysis/prompts/backtracking_v0.txt',
-    'is_solution': '/home/anikait.singh/TinyZero/pretraining_analysis/prompts/is_solution_v0.txt',
-    'verification': '/home/anikait.singh/TinyZero/pretraining_analysis/prompts/verification_v0.txt',
-    'subgoal_setting': '/home/anikait.singh/TinyZero/pretraining_analysis/prompts/subgoal_setting_v0.txt',
-    'backward_chaining': '/home/anikait.singh/TinyZero/pretraining_analysis/prompts/backward_chaining_v0.txt',
+    'backtracking': './pretraining_analysis/prompts/backtracking_v0.txt',
+    'is_solution': './pretraining_analysis/prompts/is_solution_v0.txt',
+    'verification': './pretraining_analysis/prompts/verification_v0.txt',
+    'subgoal_setting': './pretraining_analysis/prompts/subgoal_setting_v0.txt',
+    'backward_chaining': './pretraining_analysis/prompts/backward_chaining_v0.txt',
 }
 PROMPTS = {
     k: open(v).read() for k, v in PROMPT_LOC_DICT.items()
