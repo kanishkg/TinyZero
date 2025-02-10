@@ -3,12 +3,14 @@ import os
 import openai
 from absl import app, flags
 import tenacity
+import math
+from tqdm import tqdm
 
 flags.DEFINE_integer('start', -1, 'Shard to process')
 flags.DEFINE_integer('end', -1, 'Number of shards to process')
 flags.DEFINE_string('split', 'train', 'Split to process')
 flags.DEFINE_integer('max_examples', 1000000, 'Max examples to process')
-flags.DEFINE_integer('save_every', 1000, 'Save every N examples')
+flags.DEFINE_integer('save_every', 10000, 'Save every N examples')
 flags.DEFINE_string('user', 'Asap7772', 'User to push the dataset to')
 FLAGS = flags.FLAGS
 
@@ -60,28 +62,40 @@ def main(_):
         print('Subsampling the dataset with start={} and end={}'.format(FLAGS.start, FLAGS.end))
         ds = ds.select(range(FLAGS.start, FLAGS.end))
 
-    num_shards = len(ds) // FLAGS.save_every
+    num_shards = math.ceil(len(ds) / FLAGS.save_every)
     all_ds = []
-    for shard_idx in range(num_shards):
-        curr_shard = ds.select(range(shard_idx * FLAGS.save_every, (shard_idx + 1) * FLAGS.save_every))
+    for shard_idx in tqdm(range(num_shards), desc='Shards'):
+        shard_start = shard_idx * FLAGS.save_every
+        shard_end = min((shard_idx + 1) * FLAGS.save_every, len(ds))
+        
+        curr_shard = ds.select(range(shard_start, shard_end))
         mapped_shard = curr_shard.map(map_fn, batched=True, num_proc=os.cpu_count())
         all_ds.append(mapped_shard)
         
         # Save the dataset
+        try:
+            ds_so_far = datasets.concatenate_datasets(all_ds)
+            if FLAGS.start >= 0 and FLAGS.end >= 0 and FLAGS.start < FLAGS.end:
+                suffix = f'_{FLAGS.start}_{FLAGS.end}'
+            else:
+                suffix = ''
+            ds_out_name = f'{FLAGS.user}open_web_math_raw{suffix}'
+            ds_so_far.push_to_hub(ds_out_name)
+        except Exception as e:
+            print(f'Error saving dataset: {e}')
+            continue
+    
+    try:
         ds_so_far = datasets.concatenate_datasets(all_ds)
         if FLAGS.start >= 0 and FLAGS.end >= 0 and FLAGS.start < FLAGS.end:
             suffix = f'_{FLAGS.start}_{FLAGS.end}'
         else:
             suffix = ''
         ds_out_name = f'{FLAGS.user}open_web_math_raw{suffix}'
-        ds_so_far.push_to_hub(ds_out_name)
-    
-    if FLAGS.start >= 0 and FLAGS.end >= 0 and FLAGS.start < FLAGS.end:
-        suffix = f'_{FLAGS.start}_{FLAGS.end}'
-    else:
-        suffix = ''
-    ds_out_name = f'{FLAGS.user}open_web_math_raw{suffix}'
-    ds.push_to_hub(ds_out_name)
+        ds.push_to_hub(ds_out_name)
+    except Exception as e:
+        print(f'Final error saving dataset: {e}')
+    print('Done')
     
 if __name__ == '__main__':
     app.run(main)
