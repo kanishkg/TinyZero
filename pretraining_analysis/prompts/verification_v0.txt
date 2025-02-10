@@ -1,0 +1,23 @@
+# Task Description
+You will be provided with a chain-of-reasoning that a Language Model generated.
+
+Evaluate whether the chain-of-reasoning contains any answer-verification steps. An example of an answer-verification step is: 'This sequence results in 1, which is not equal to 22' or 'Since 25 is not equal to 22'. We want to mark instances where the chain-of-reasoning explicitly checks the current result against the target number. 
+
+If you find any answer-verification steps, please count them and provide the count as between the tags <count> </count>.
+
+# Task Format
+Format your response in markdown as follows:
+
+## Does answer verification?
+[yes/no]
+
+## Number of answer verification steps
+<count> [1/2/...] </count>.
+
+## Rationale
+[Brief description describing what behavior was noticed and where answer verification may have occured]
+
+# Task to evaluate for Answer Verification
+{response}
+
+# Response

@@ -1,0 +1,14 @@
+## Contains Problem?
+{analysis_contain_problem}
+
+## Contains Solution?
+{analysis_contain_solution}
+
+## Text domain (broad)
+{analysis_domain_broad}
+
+## Text domain (specific)
+{analysis_domain_specific}
+
+## Rationale
+{analysis_rationale}

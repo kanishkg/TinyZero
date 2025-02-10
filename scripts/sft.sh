@@ -1,0 +1,78 @@
+eval "$(conda shell.bash hook)"
+conda activate zero
+
+# Set environment variables
+hf_cache_dir="/home/anikait.singh/.cache/"
+export WANDB_API_KEY=a393f29dee9351c0a8c4e410e626e20733564d26
+export WANDB_USERNAME=gurpreetkaur94539
+export WANDB_USER_EMAIL=gurpreetkaur94539gmail.com
+export WANDB__SERVICE_WAIT=300
+export WANDB_ENTITY=cocolab
+export HF_DATASETS_CACHE=$hf_cache_dir
+export HF_TOKEN='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'
+
+# List of dataset conditions
+conditions=(
+  negative_control
+  only_backtracking
+  backtracking_verification
+  backtracking_subgoal
+  backtracking_backward
+  all_strategies
+)
+
+model_names=(
+  allenai/OLMo-7B-hf
+  meta-llama/Llama-3.2-3B
+)
+
+# Base path for dataset files
+base_data_path="/home/anikait.singh/rl_behaviors/cot_datasets/processed_data"
+
+# Shared training parameters
+prompt_key="query"
+response_key="completion"
+micro_batch_size=16
+train_batch_size=80
+max_length=2048
+default_hdfs_dir="/home/anikait.singh/rl_behaviors/hdfs"
+default_local_dir="/home/anikait.singh/rl_behaviors/sft"
+project_name="countdown-sft"
+total_epochs=5
+logger="['console','wandb']"
+lr=1e-5
+
+# Iterate over each condition and launch a training job
+for condition in "${conditions[@]}"; do
+for model_name in "${model_names[@]}"; do
+  train_file="${base_data_path}/${condition}/train.parquet"
+  val_file="${base_data_path}/${condition}/test.parquet"
+
+  experiment_name="countdown-sft-${model_name}-${condition}"
+  save_dir="${default_local_dir}/${condition}"
+
+  echo "Running training for condition: ${condition}"
+  echo "Train file: ${train_file}"
+  echo "Val file:   ${val_file}"
+  echo "Experiment name: ${experiment_name}"
+  echo ""
+
+  torchrun --nproc_per_node=8 -m verl.trainer.fsdp_sft_trainer \
+    data.train_files="${train_file}" \
+    data.val_files="${val_file}" \
+    data.prompt_key="${prompt_key}" \
+    data.response_key="${response_key}" \
+    data.micro_batch_size="${micro_batch_size}" \
+    data.train_batch_size="${train_batch_size}" \
+    data.max_length="${max_length}" \
+    model.partial_pretrain="${model_name}" \
+    trainer.default_hdfs_dir="${default_hdfs_dir}" \
+    trainer.default_local_dir="${save_dir}" \
+    trainer.project_name="${project_name}" \
+    trainer.experiment_name="${experiment_name}" \
+    trainer.total_epochs="${total_epochs}" \
+    trainer.logger="${logger}" \
+    optim.lr="${lr}" \
+  echo "--------------------------------------------------"
+done
+done

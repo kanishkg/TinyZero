@@ -1,0 +1,8 @@
+## Does backtrack?
+{is_backtrack}
+
+## Number of backtrack steps
+{backtrack_count}
+
+## Rationale
+{backtrack_rationale}
