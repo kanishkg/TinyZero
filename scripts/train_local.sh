@@ -7,24 +7,26 @@ export WANDB_API_KEY=a393f29dee9351c0a8c4e410e626e20733564d26
 export WANDB_USERNAME=gurpreetkaur94539
 export WANDB_USER_EMAIL=gurpreetkaur94539gmail.com
 export WANDB__SERVICE_WAIT=300
+export WANDB_ENTITY=cocolab
 export HF_DATASETS_CACHE=$hf_cache_dir
 export HF_TOKEN='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'
 
 models=(
     # qhduan/aquila-7b
     # Qwen/Qwen2.5-3B
-    # allenai/OLMo-2-1124-7B
-    # allenai/OLMo-7B-hf
-    allenai/OLMo-1B-hf
-    google/gemma-2b
+    # allenai/OLMo-1B-hf
+    # google/gemma-2b
+    allenai/OLMo-7B-hf
+    meta-llama/Llama-2-7b
 )
 num_models=${#models[@]}
 names=(
     # countdown-aquila7b
     # countdown-qwen2.5-3b
-    # countdown-olmo7b
-    countdown-olmo1b
-    countdown-gemma2b
+    # countdown-olmo1b
+    # countdown-gemma2b
+    countdown-olmo7b
+    countdown-llama2-7b
 )
 num_names=${#names[@]}
 data_dir="/raid0/data_countdown"
