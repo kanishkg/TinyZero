@@ -70,7 +70,7 @@ def main():
             model=model_ckpt,
             enable_prefix_caching=False,
             trust_remote_code=True,
-            tensor_parallel_size=torch.cuda.device_count(),
+            tensor_parallel_size=1,
             gpu_memory_utilization=0.95,
         )
 
