@@ -4,11 +4,11 @@
 #SBATCH --account=cocoflops           # Account name
 #SBATCH --partition=cocoflops         # Partition name
 #SBATCH --time=08:00:00               # Run time (hh:mm:ss)
-#SBATCH -c 16                         # Number of CPU cores
-#SBATCH --gres=gpu:5                  # Number of GPUs
+#SBATCH -c 10                         # Number of CPU cores
+#SBATCH --gres=gpu:2                  # Number of GPUs
 #SBATCH --nodes=1                     # Number of nodes
-# SBATCH --nodelist=cocoflops2        # (Optional) Specific node; uncomment if needed
-#SBATCH --mem=80G                     # Memory size
+# SBATCH --nodelist=cocoflops-hgx-1   # (Optional) Specific node; uncomment if needed
+#SBATCH --mem=50G                     # Memory size
 #SBATCH --output=./slurm_logs/%x_%j.log  # Unique log file per job: jobName_jobID.log
 
 set -e  # Exit immediately if a command exits with a non-zero status
@@ -18,7 +18,7 @@ conda activate zero
 
 # List of dataset conditions
 conditions=(
-  "negative_control"
+  "human_cot"
 )
 
 # Base path for dataset files
@@ -27,10 +27,10 @@ base_data_path="/scr/akchak/rl_behaviors/cot_datasets/processed_data"
 # Shared training parameters
 prompt_key="query"
 response_key="completion"
-micro_batch_size=10
-train_batch_size=80
+micro_batch_size=8
+train_batch_size=64
 max_length=2048
-model_name="Qwen/Qwen2.5-3B"
+model_name="meta-llama/Llama-3.2-3B"
 default_hdfs_dir="/scr/akchak/rl_behaviors/hdfs"
 default_local_dir="/scr/akchak/rl_behaviors/sft"
 project_name="countdown-sft"
@@ -43,6 +43,7 @@ for condition in "${conditions[@]}"; do
   val_file="${base_data_path}/${condition}/test.parquet"
 
   experiment_name="countdown-sft-${model_name}-${condition}"
+
   save_dir="${default_local_dir}/${condition}"
 
   echo "Running training for condition: ${condition}"
@@ -51,7 +52,7 @@ for condition in "${conditions[@]}"; do
   echo "Experiment name: ${experiment_name}"
   echo ""
 
-  torchrun --nproc_per_node=5 -m verl.trainer.fsdp_sft_trainer \
+  torchrun --nproc_per_node=2 -m verl.trainer.fsdp_sft_trainer \
     data.train_files="${train_file}" \
     data.val_files="${val_file}" \
     data.prompt_key="${prompt_key}" \
