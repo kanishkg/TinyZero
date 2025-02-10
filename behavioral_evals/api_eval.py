@@ -1,21 +1,19 @@
 import json
+import random
 from google import genai
+from google.genai import types
 from argparse import ArgumentParser
 import os
 import re
 from typing import List, Dict, Any
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime
 from tqdm import tqdm
-
-import sys
-sys.path.append('./OpenRLHF')
-from tasks.countdown import CountDown
 
 GEMINI_API_KEY = "AIzaSyBt1BuUCQvwYMJqRu7Pj84xKpi8bnEt5dM"
 
 class RateLimitedEvaluator:
-    def __init__(self, api_key: str, rate_limit: int = 500, target_utilization: float = 0.9):
+    def __init__(self, api_key: str, rate_limit: int = 50, target_utilization: float = 0.9):
         self.client = genai.Client(api_key=api_key)
         self.rate_limit = rate_limit  # requests per minute
         self.target_utilization = target_utilization
@@ -23,154 +21,199 @@ class RateLimitedEvaluator:
         self.request_times = []
         self.last_request_time = None
         self.target_interval = 60 / self.target_requests_per_minute
-        self.checker = CountDown.verify_answer
+        # A lock to protect rate-limit shared state when running concurrently.
+        self.rate_limit_lock = asyncio.Lock()
 
     async def _maintain_request_rate(self):
-        """Maintain a steady request rate at target utilization"""
-        now = datetime.now()
-        
-        if self.last_request_time is not None:
-            # Calculate time since last request
-            elapsed = (now - self.last_request_time).total_seconds()
+        """Maintain a steady request rate at target utilization with a simplified hand‐brake."""
+        async with self.rate_limit_lock:
+            now = datetime.now()
             
-            # If we're going faster than our target rate, wait
-            if elapsed < self.target_interval:
-                await asyncio.sleep(self.target_interval - elapsed)
-        
-        # Update last request time after any necessary wait
-        self.last_request_time = datetime.now()
-        
-        # Maintain rolling window of request times
-        minute_ago = now - timedelta(minutes=1)
-        self.request_times = [t for t in self.request_times if t > minute_ago]
-        self.request_times.append(now)
-        
-        # If we're somehow over rate limit, implement emergency brake
-        if len(self.request_times) >= self.rate_limit:
-            wait_time = (self.request_times[0] - minute_ago).total_seconds()
-            if wait_time > 0:
-                await asyncio.sleep(wait_time)
-            self.request_times = self.request_times[1:]
+            if self.last_request_time is not None:
+                # Calculate time since last request
+                elapsed = (now - self.last_request_time).total_seconds()
+                # If we're going faster than our target rate, wait
+                if elapsed < self.target_interval:
+                    await asyncio.sleep(self.target_interval - elapsed)
+            
+            # Update last request time after any necessary wait
+            self.last_request_time = datetime.now()
+            
+            # Remove entries older than 1 minute
+            self.request_times = [t for t in self.request_times if (now - t).total_seconds() < 60]
+            self.request_times.append(now)
+            
+            # Emergency brake: if we've reached the rate limit, wait until the oldest request is over a minute old
+            if len(self.request_times) >= self.rate_limit:
+                oldest = self.request_times[0]
+                elapsed_since_oldest = (datetime.now() - oldest).total_seconds()
+                wait_time = max(0, 60 - elapsed_since_oldest)
+                if wait_time > 0:
+                    await asyncio.sleep(wait_time)
+                # After waiting, clear the request history
+                self.request_times = []
 
     async def _make_rate_limited_request(self, prompt: str) -> str:
-        """Make a rate-limited request to the Gemini API"""
-        await self._maintain_request_rate()
-        
-        # Make API request
-        response = self.client.models.generate_content(
-            model="gemini-1.5-flash",
-            contents=prompt,
-        )
-        
-        return response.text
+        """Make a rate-limited request to the Gemini API with hand‐break applied for errors."""
+        max_retries = 3
+        attempts = 0
+        while True:
+            await self._maintain_request_rate()
+            try:
+                response = self.client.models.generate_content(
+                    model="gemini-1.5-flash",
+                    contents=prompt,
+                    config=types.GenerateContentConfig(
+                        temperature=0.,
+                        top_p=0.95,
+                        top_k=64,
+                        max_output_tokens=256,
+                        response_mime_type="text/plain"
+                    )
+                )
+                if response.text is None:
+                    raise Exception("None response")
+                return response.text
+            except Exception as e:
+                error_message = str(e)
+                if (
+                    "429" in error_message or 
+                    "RESOURCE_EXHAUSTED" in error_message or
+                    "None response" in error_message or 
+                    "500" in error_message or 
+                    "INTERNAL" in error_message
+                ):
+                    attempts += 1
+                    print(
+                        f"Received RESOURCE_EXHAUSTED or INTERNAL error. "
+                        f"Attempt {attempts} of {max_retries}. "
+                        f"Applying hand‐break and retrying lost example."
+                    )
+                    await asyncio.sleep(60)
+                    # Reset request history after a hand‐break
+                    self.request_times = []
+                    if attempts >= max_retries:
+                        raise e
+                else:
+                    raise e
 
-    async def _verify_with_gemini(self, query: str, completion: str) -> Dict[str, Any]:
-        """Verify multiple behaviors using Gemini model with rate limiting"""
-        # Extract numbers and target from query
-        target = int(re.search(r'results in (\d+)', query).group(1))
-        numbers = [int(x.strip()) for x in re.search(r'numbers ([\d, ]+)', query).group(1).split(',')]
-        
-        # 1. Check for answer verification steps
+    async def _verify_with_gemini(
+        self, query: str, completion: str, target: int = None, numbers: List[int] = None
+    ) -> Dict[str, Any]:
+        """Run four checks on the model's chain-of-reasoning:
+           1) Answer verification steps
+           2) Backtracking behavior
+           3) Subgoal setting
+           4) Backward-chaining
+        """
+        # Extract numbers and target from query if not provided
+        if target is None:
+            target_match = re.search(r"results in (\d+)", query)
+            if target_match:
+                target = int(target_match.group(1))
+
+        if numbers is None:
+            numbers_match = re.search(r"numbers ([\d, ]+)", query)
+            if numbers_match:
+                numbers = [int(x.strip()) for x in numbers_match.group(1).split(",")]
+
+        # Default fallback if not parseable:
+        if not numbers:
+            numbers = []
+        if not target:
+            target = 0
+
+        # Regex pattern for extracting the count from Gemini's response
+        count_match = r"<count>\s*(\d+)\s*</count>"
+
+        # 1. Answer-verification steps
         verification_prompt = f"""Here is a chain-of-reasoning that a Language Model generated while trying to play the game of CountDown with the numbers {numbers}. The goal is to reach the target number {target}. The chain-of-reasoning the model used is: {completion}. 
 
 Evaluate whether the chain-of-reasoning contains any answer-verification steps. An example of an answer-verification step is: 'This sequence results in 1, which is not equal to 22' or 'Since 25 is not equal to 22'. We want to mark instances where the chain-of-reasoning explicitly checks the current result against the target number. 
 
-If you find any answer-verification steps, please count them and provide the count as between the tags <count> </count>."""
-
+If you find any answer-verification steps, please count them and provide the count as between the tags <count> </count>. If the chain-of-reasoning does not contain any answer-verification steps, please provide a count of 0 as <count>0</count>."""
         verification_response = await self._make_rate_limited_request(verification_prompt)
-        verification_count = int(re.search(r'<count>(\d+)</count>', verification_response).group(1))
+        try:
+            verification_count = int(re.search(count_match, verification_response).group(1))
+        except:
+            verification_count = 0
 
-        # 2. Check for backtracking behavior
+        # 2. Backtracking behavior
         backtracking_prompt = f"""Here is a chain-of-reasoning that a Language Model generated while trying to play the game of CountDown with the numbers {numbers}. The goal is to reach the target number {target}. The chain-of-reasoning the model used is: {completion}.
 
 Evaluate whether the chain-of-reasoning contains any backtracking behavior, where the model realizes a path won't work and explicitly goes back to try a different approach. An example of backtracking is: "Let me try again" or "we need to try a different sequence". We want to mark instances where the chain-of-reasoning is abandoned and the model backtracks to a previous computation. 
 
-Count the number of distinct backtracking instances and provide the count between the tags <count> </count>."""
-
+Count the number of distinct backtracking instances and provide the count between the tags <count> </count>. If the chain-of-reasoning does not contain any backtracking behavior, please provide a count of 0 as <count>0</count>."""
         backtracking_response = await self._make_rate_limited_request(backtracking_prompt)
-        backtracking_count = int(re.search(r'<count>(\d+)</count>', backtracking_response).group(1))
+        try:
+            backtracking_count = int(re.search(count_match, backtracking_response).group(1))
+        except:
+            backtracking_count = 0
 
-        # 3. Check for subgoal setting
+        # 3. Subgoal setting
         subgoal_prompt = f"""Here is a chain-of-reasoning that a Language Model generated while trying to play the game of CountDown with the numbers {numbers}. The goal is to reach the target number {target}. The chain-of-reasoning the model used is: {completion}.
 
 Evaluate whether the chain-of-reasoning contains any explicit subgoal setting, where the model breaks down the problem into smaller, intermediate goals. An example of subgoal setting is: "First, I'll try to get close to {target//2}, then...".
 
-Count the number of distinct subgoals set and provide the count between the tags <count> </count>."""
-
+Count the number of distinct subgoals set and provide the count between the tags <count> </count>. If the chain-of-reasoning does not contain any subgoal setting, please provide a count of 0 as <count>0</count>."""
         subgoal_response = await self._make_rate_limited_request(subgoal_prompt)
-        subgoal_count = int(re.search(r'<count>(\d+)</count>', subgoal_response).group(1))
+        try:
+            subgoal_count = int(re.search(count_match, subgoal_response).group(1))
+        except:
+            subgoal_count = 0
 
-        # 4. Check for backward-chaining behavior
+        # 4. Backward-chaining
         backward_chaining_prompt = f"""Here is a chain-of-reasoning that a Language Model generated while trying to play the game of CountDown with the numbers {numbers}. The goal is to reach the target number {target}. The chain-of-reasoning the model used is: {completion}.
 
-    Evaluate whether the chain-of-reasoning contains any backward-chaining behavior, where the model starts from the target number and works backwards to the initial numbers. An example of backward-chaining when the target is 24 and the numbers are 12 and 2 is: "Let's work backwards from the target. 24/2 = 12. So, 12*2=24." and if the target is 22 and the numbers are 25 and 3 is: "Since the target is 22, and 22 + 3 = 25, ...".
+Evaluate whether the chain-of-reasoning contains any backward-chaining behavior, where the model starts from the target number and works backwards to the initial numbers. An example of backward-chaining when the target is 24 and the numbers are 12 and 2 is: "Let's work backwards from the target. 24/2 = 12. So, 12*2=24." and if the target is 22 and the numbers are 25 and 3 is: "Since the target is 22, and 22 + 3 = 25, ...".
 
-    Count the number of distinct backward-chaining instances and provide the count between the tags <count> </count>."""
+Count the number of distinct backward-chaining instances and provide the count between the tags <count> </count>. If the chain-of-reasoning does not contain any backward-chaining behavior, please provide a count of 0 as <count>0</count>."""
         backward_response = await self._make_rate_limited_request(backward_chaining_prompt)
-        backward_count = int(re.search(r'<count>(\d+)</count>', backward_response).group(1))
-        
-        # Calculate accuracy
-        accuracy = self.checker(query, completion)
+        try:
+            backward_count = int(re.search(count_match, backward_response).group(1))
+        except:
+            backward_count = 0
         
         return {
             'verification_count': verification_count,
             'backtracking_count': backtracking_count,
             'subgoal_count': subgoal_count,
             'backward_count': backward_count,
-            'accuracy': accuracy
         }
 
     async def process_completions(self, completions: List[Dict[str, str]]) -> List[Dict[str, Any]]:
-        """Process all completions with concurrent rate limiting"""
-        # Calculate target concurrent tasks based on rate limit
-        # We want enough concurrent tasks to maintain our target rate
-        # Each completion needs 4 requests, so we adjust accordingly
-        target_concurrency = int(self.target_requests_per_minute / 60 * 4)  # 4 seconds worth of requests
-        
-        # Calculate and display estimated completion time
-        total_requests = len(completions) * 4  # 4 prompts per completion
-        estimated_time = (total_requests * self.target_interval) / (60 * target_concurrency)  # minutes
-        print(f"Estimated completion time: {estimated_time:.2f} minutes with {target_concurrency} concurrent tasks")
-        
+        # Limit concurrency with a semaphore
+        semaphore = asyncio.Semaphore(100)
         results = []
-        semaphore = asyncio.Semaphore(target_concurrency)
         
-        async def process_with_semaphore(item):
+        async def process_item(item):
             async with semaphore:
                 try:
-                    result = await self._verify_with_gemini(item['query'], item['completion'])
+                    # The script supports either 'query'/'completion' fields or 'prompt'/'generated'
+                    prompt = item['query'] if 'query' in item else item['prompt']
+                    completion = item['completion'] if 'completion' in item else item['generated']
+                    target = item.get('ground_truth', {}).get('target', None)
+                    numbers = item.get('ground_truth', {}).get('numbers', None)
+                    result = await self._verify_with_gemini(prompt, completion, target, numbers)
                     return {
-                        'query': item['query'],
-                        'completion': item['completion'],
+                        'query': prompt,
+                        'completion': completion,
                         **result
                     }
                 except Exception as e:
                     print(f"Error processing item: {e}")
                     return None
         
-        # Create tasks for all completions
-        tasks = [process_with_semaphore(item) for item in completions]
-        
-        # Process in batches with progress bar
-        with tqdm(total=len(completions), desc="Processing completions") as pbar:
-            for batch_start in range(0, len(tasks), 100):
-                batch = tasks[batch_start:batch_start + 100]
-                batch_results = await asyncio.gather(*batch)
-                
-                # Filter out None results from errors
-                valid_results = [r for r in batch_results if r is not None]
-                results.extend(valid_results)
-                pbar.update(len(batch))
-                
-                # Print current utilization stats
-                current_rate = len(self.request_times)
-                utilization = current_rate / self.rate_limit
-                print(f"\nCurrent utilization: {utilization:.2%} ({current_rate} requests/minute)")
-        
+        tasks = [asyncio.create_task(process_item(item)) for item in completions]
+        # Use asyncio.as_completed with tqdm to track progress
+        for future in tqdm(asyncio.as_completed(tasks), total=len(tasks), desc="Processing completions"):
+            res = await future
+            if res is not None:
+                results.append(res)
         return results
 
 def get_completion_files(completions_dir: str) -> List[tuple[int, str]]:
-    """Get sorted list of completion files with their step numbers"""
+    """Get sorted list of completion files with their step numbers."""
     files = []
     for filename in os.listdir(completions_dir):
         if filename.startswith('completions_step') and filename.endswith('.jsonl'):
@@ -200,6 +243,12 @@ async def main():
         default=GEMINI_API_KEY,
         help="Gemini API key"
     )
+    parser.add_argument(
+        "--num-samples",
+        type=int,
+        default=None,
+        help="Number of random completions to sample from each file. If not set or 0, all completions are processed."
+    )
     args = parser.parse_args()
     
     # Create output directory if it doesn't exist
@@ -209,8 +258,12 @@ async def main():
     if not args.completions_dir.endswith('.jsonl'):
         completion_files = get_completion_files(args.completions_dir)
     else:
-        completion_files = [(0, args.completions_dir)]
-    print(f"Found {len(completion_files)} completion files")
+        if 'step' in args.completions_dir:
+            step = int(re.search(r'step_?(\d+)', args.completions_dir).group(1))
+        else:
+            step = 0
+        completion_files = [(step, args.completions_dir)]
+    print(f"Found {len(completion_files)} completion file(s).")
     
     # Initialize evaluator
     evaluator = RateLimitedEvaluator(args.api_key)
@@ -221,12 +274,20 @@ async def main():
         print(f"\nProcessing step {step} from {os.path.basename(filepath)}")
         
         # Load completions
-        completions = []
         with open(filepath, 'r') as f:
-            for line in f:
-                completions.append(json.loads(line))
+            completions = json.load(f)
+
+        # Optionally sample completions if --num-samples is provided
+        if args.num_samples and args.num_samples > 0:
+            if len(completions) > args.num_samples:
+                completions = random.sample(completions, args.num_samples)
+                print(f"Randomly sampled {args.num_samples} completions.")
+            else:
+                print(f"Requested {args.num_samples} samples, but only {len(completions)} items found. Using all items.")
+        else:
+            print(f"Using all {len(completions)} completions from file.")
         
-        # Process completions
+        # Process completions concurrently
         print(f"Processing {len(completions)} completions...")
         results = await evaluator.process_completions(completions)
         
@@ -234,11 +295,12 @@ async def main():
         total_verifications = sum(r['verification_count'] for r in results)
         total_backtracking = sum(r['backtracking_count'] for r in results)
         total_subgoals = sum(r['subgoal_count'] for r in results)
+        total_backwards = sum(r['backward_count'] for r in results)
         
-        avg_verifications = total_verifications / len(results)
-        avg_backtracking = total_backtracking / len(results)
-        avg_subgoals = total_subgoals / len(results)
-        accuracy = sum(r['accuracy'] for r in results) / len(results)
+        avg_verifications = total_verifications / len(results) if results else 0
+        avg_backtracking = total_backtracking / len(results) if results else 0
+        avg_subgoals = total_subgoals / len(results) if results else 0
+        avg_backwards = total_backwards / len(results) if results else 0
         
         # Store results for this step
         step_results = {
@@ -247,10 +309,11 @@ async def main():
                 'total_verifications': total_verifications,
                 'total_backtracking': total_backtracking,
                 'total_subgoals': total_subgoals,
+                'total_backwards': total_backwards,
                 'avg_verifications': avg_verifications,
                 'avg_backtracking': avg_backtracking,
                 'avg_subgoals': avg_subgoals,
-                'accuracy': accuracy
+                'avg_backwards': avg_backwards
             }
         }
         
@@ -269,28 +332,50 @@ async def main():
             'avg_verifications': avg_verifications,
             'avg_backtracking': avg_backtracking,
             'avg_subgoals': avg_subgoals,
+            'avg_backwards': avg_backwards,
             'total_verifications': total_verifications,
             'total_backtracking': total_backtracking,
             'total_subgoals': total_subgoals,
-            'accuracy': accuracy
+            'total_backwards': total_backwards,
         }
         
-        print(f"Step {step} complete:")
-        print(f"Average verifications: {avg_verifications:.4f}")
-        print(f"Average backtracking: {avg_backtracking:.4f}")
-        print(f"Average subgoals: {avg_subgoals:.4f}")
-        print(f"Total verifications: {total_verifications}")
-        print(f"Total backtracking: {total_backtracking}")
-        print(f"Total subgoals: {total_subgoals}")
-        print(f"Accuracy: {accuracy:.4f}")
+        print(f"\nStep {step} complete:")
+        print(f"  Average verifications: {avg_verifications:.4f}")
+        print(f"  Average backtracking:  {avg_backtracking:.4f}")
+        print(f"  Average subgoals:      {avg_subgoals:.4f}")
+        print(f"  Average backwards:     {avg_backwards:.4f}")
+        print(f"  Total verifications:   {total_verifications}")
+        print(f"  Total backtracking:    {total_backtracking}")
+        print(f"  Total subgoals:        {total_subgoals}")
+        print(f"  Total backwards:       {total_backwards}")
     
     # Save aggregate results
+    # First read existing results if the file exists
+    # First read existing results if the file exists
     aggregate_path = os.path.join(args.output_dir, "all_results.json")
+    existing_results = {"results_by_step": {}, "steps_processed": []}
+    
+    if os.path.exists(aggregate_path):
+        with open(aggregate_path, 'r') as f:
+            existing_results = json.load(f)
+    
+    # Convert new results keys to strings
+    all_results = {str(step): results for step, results in all_results.items()}
+    
+    # Merge new results with existing ones
+    # Only add results for steps that aren't already present
+    for step, results in all_results.items():
+        if step not in existing_results['results_by_step']:
+            existing_results['results_by_step'][step] = results
+    
+    # Update the steps processed list - convert to integers for sorting, then back to strings
+    existing_results['steps_processed'] = [
+        str(x) for x in sorted(int(x) for x in existing_results['results_by_step'].keys())
+    ]
+    
+    # Write back the merged results
     with open(aggregate_path, 'w') as f:
-        json.dump({
-            'results_by_step': all_results,
-            'steps_processed': sorted(all_results.keys())
-        }, f, indent=2)
+        json.dump(existing_results, f, indent=2)
     
     print("\nAll processing complete!")
     print(f"Full results saved to: {aggregate_path}")
