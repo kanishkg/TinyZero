@@ -108,15 +108,15 @@ def main(args):
             output = response.outputs[0].text.strip()
             idx = i % 5
             if idx == 0:
-                curr_batch['backtracking_raw'].append(output)
+                curr_batch['backtracking_raw'][e] = output
             elif idx == 1:
-                curr_batch['is_solution_raw'].append(output)
+                curr_batch['is_solution_raw'][e] = output
             elif idx == 2:
-                curr_batch['verification_raw'].append(output)
+                curr_batch['verification_raw'][e] = output
             elif idx == 3:
-                curr_batch['subgoal_setting_raw'].append(output)
+                curr_batch['subgoal_setting_raw'][e] = output
             elif idx == 4:
-                curr_batch['backward_chaining_raw'].append(output)
+                curr_batch['backward_chaining_raw'][e] = output
 
         all_ds.append(curr_batch)
         
