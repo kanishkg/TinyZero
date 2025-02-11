@@ -81,7 +81,7 @@ def main(args):
         trust_remote_code=True,
         tensor_parallel_size=4,
         gpu_memory_utilization=0.95,
-        max_seq_len=4096,
+        max_model_len=4096,
     )
     tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.3-70B-Instruct")
 
