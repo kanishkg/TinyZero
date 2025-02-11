@@ -37,7 +37,7 @@ def get_prompts(ds, tokenizer, prompt_templates):
         else:
             samples += [ds['text'][e]]
 
-    for example in tqdm(ds['text'], desc="Generating prompts"):
+    for example in tqdm(samples, desc="Generating prompts"):
         backtracking_prompt = prompt_templates['backtracking'].format(response=example)
         backtracking_prompt = [{'role': 'user', 'content': backtracking_prompt}]
         is_solution_prompt = prompt_templates['is_solution'].format(response=example)
