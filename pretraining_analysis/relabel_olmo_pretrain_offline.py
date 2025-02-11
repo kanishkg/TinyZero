@@ -107,6 +107,7 @@ def main(args):
         for i, response in enumerate(responses):
             output = response.outputs[0].text.strip()
             idx = i % 5
+            import pdb; pdb.set_trace()
             if idx == 0:
                 curr_batch['backtracking_raw'][i//5] = output
             elif idx == 1:
