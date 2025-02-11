@@ -50,7 +50,7 @@ def main(args):
         print('Subsampling the dataset with start={} and end={}'.format(args.start, args.end))
         ds = ds.select(range(args.start, args.end))
     llm = LLM(
-        model='meta-llama/Meta-Llama-3.3-70B-Instruct',
+        model='meta-llama/Llama-3.3-70B-Instruct',
         enable_prefix_caching=True,
         trust_remote_code=True,
         tensor_parallel_size=2,
