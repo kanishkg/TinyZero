@@ -70,7 +70,6 @@ def main(args):
         trust_remote_code=True,
         tensor_parallel_size=2,
         gpu_memory_utilization=0.95,
-        tokenizer_mode="auto",
     )
     tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.3-70B-Instruct")
 
