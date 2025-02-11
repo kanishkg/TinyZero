@@ -1,7 +1,7 @@
 # Task Description
-You will be provided with a chain-of-reasoning that a Language Model generated.
+You will be provided with text from the inernet.
 
-Evaluate whether the chain-of-reasoning contains any explicit subgoal setting, where the model breaks down the problem into smaller, intermediate goals. An example of subgoal setting is: "First, I'll try to get close to <target//2>, then...". 
+Evaluate whether the text contains any explicit subgoal setting, where the model breaks down the problem into smaller, intermediate goals.
 
 If you find any subgoal steps, please count them and provide the count as between the tags <count> </count>. If the chain-of-reasoning does not contain any subgoal setting, please provide a count of 0 as <count>0</count>.
 

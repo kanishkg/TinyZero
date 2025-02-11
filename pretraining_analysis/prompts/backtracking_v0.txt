@@ -1,7 +1,7 @@
 # Task Description
-You will be provided with a chain-of-reasoning that a Language Model generated.
+You will be provided with text from the inernet.
 
-Evaluate whether the chain-of-reasoning contains any backtracking behavior, where the model realizes a path won't work and explicitly goes back to try a different approach. An example of backtracking is: "Let me try again", "Wait" or "we need to try a different sequence". We want to mark instances where the chain-of-reasoning is abandoned and the model backtracks to a previous computation. 
+Evaluate whether the text contains any backtracking behavior, where in the text, the writer realizes a path won't work and explicitly goes back to try a different approach. An example of backtracking is: "Let me try again", "Wait" or "we need to try a different sequence". We want to mark instances where the chain-of-reasoning is abandoned and the writer backtracks to a previous computation. 
 
 Count the number of distinct backtracking instances and provide the count between the tags <count> </count>. If the chain-of-reasoning does not contain any backtracking, please provide a count of 0 as <count>0</count>.
 
