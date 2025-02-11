@@ -98,26 +98,35 @@ def main(args):
             temperature=0,
         )
         responses = llm.generate(prompts, sampling_params=sampling_params)
-        curr_batch = curr_batch.add_column('backtracking_raw', [None] * len(curr_batch))
-        curr_batch = curr_batch.add_column('is_solution_raw', [None] * len(curr_batch))
-        curr_batch = curr_batch.add_column('verification_raw', [None] * len(curr_batch))
-        curr_batch = curr_batch.add_column('subgoal_setting_raw', [None] * len(curr_batch))
-        curr_batch = curr_batch.add_column('backward_chaining_raw', [None] * len(curr_batch))
 
+        outputs_dict = {
+            'backtracking_raw': [None] * len(curr_batch),
+            'is_solution_raw': [None] * len(curr_batch),
+            'verification_raw': [None] * len(curr_batch),
+            'subgoal_setting_raw': [None] * len(curr_batch),
+            'backward_chaining_raw': [None] * len(curr_batch)
+        }
+        
         for i, response in enumerate(responses):
             output = response.outputs[0].text.strip()
             idx = i % 5
-            import pdb; pdb.set_trace()
+            batch_idx = i // 5
             if idx == 0:
-                curr_batch['backtracking_raw'][i//5] = output
+                outputs_dict['backtracking_raw'][batch_idx] = output
             elif idx == 1:
-                curr_batch['is_solution_raw'][i//5] = output
+                outputs_dict['is_solution_raw'][batch_idx] = output
             elif idx == 2:
-                curr_batch['verification_raw'][i//5] = output
+                outputs_dict['verification_raw'][batch_idx] = output
             elif idx == 3:
-                curr_batch['subgoal_setting_raw'][i//5] = output
+                outputs_dict['subgoal_setting_raw'][batch_idx] = output
             elif idx == 4:
-                curr_batch['backward_chaining_raw'][i//5] = output
+                outputs_dict['backward_chaining_raw'][batch_idx] = output
+
+        curr_batch = curr_batch.add_column('backtracking_raw', outputs_dict['backtracking_raw'])
+        curr_batch = curr_batch.add_column('is_solution_raw', outputs_dict['is_solution_raw'])
+        curr_batch = curr_batch.add_column('verification_raw', outputs_dict['verification_raw'])
+        curr_batch = curr_batch.add_column('subgoal_setting_raw', outputs_dict['subgoal_setting_raw'])
+        curr_batch = curr_batch.add_column('backward_chaining_raw', outputs_dict['backward_chaining_raw'])
 
         all_ds.append(curr_batch)
         
