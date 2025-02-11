@@ -98,11 +98,11 @@ def main(args):
             temperature=0,
         )
         responses = llm.generate(prompts, sampling_params=sampling_params)
-        curr_batch['backtracking_raw'] = [] 
-        curr_batch['is_solution_raw'] = []
-        curr_batch['verification_raw'] = []
-        curr_batch['subgoal_setting_raw'] = []
-        curr_batch['backward_chaining_raw'] = []
+        curr_batch = curr_batch.add_column('backtracking_raw', [None] * len(curr_batch))
+        curr_batch = curr_batch.add_column('is_solution_raw', [None] * len(curr_batch))
+        curr_batch = curr_batch.add_column('verification_raw', [None] * len(curr_batch))
+        curr_batch = curr_batch.add_column('subgoal_setting_raw', [None] * len(curr_batch))
+        curr_batch = curr_batch.add_column('backward_chaining_raw', [None] * len(curr_batch))
 
         for i, response in enumerate(responses):
             output = response.outputs[0].text.strip()
