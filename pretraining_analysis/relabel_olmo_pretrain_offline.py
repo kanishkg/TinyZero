@@ -26,8 +26,6 @@ PROMPT_LOC_DICT = {
 
 def get_prompts(ds, tokenizer, prompt_templates):
     prompts = []
-    print(len(ds['text']))
-    import pdb; pdb.set_trace()
     tokenized_inputs = tokenizer(ds['text'])
     samples = []
     max_seq_length = 4096
