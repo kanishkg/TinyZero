@@ -1,5 +1,5 @@
 # Task Description
-You will be provided with a general peice of text.
+You will be provided with text from the internet.
 
 Your goal is to identify if a problem and solution exists in the text and identify which domain the text talks about.
 

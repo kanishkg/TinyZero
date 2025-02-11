@@ -1,21 +1,21 @@
 # Task Description
-You will be provided with text from the inernet.
+You will be provided with text from the internet.
 
-Evaluate whether the text contains any backward-chaining behavior, where the writer is working towards a goal but starts from the goal and works backwards.
+Evaluate whether the text contains any backward-chaining behavior, where the writer is working towards a goal but starts from the goal and works backward.
 
-Count the number of distinct backward-chaining instances and provide the count between the tags <count> </count>. If the chain-of-reasoning does not contain any backward-chaining behavior, please provide a count of 0 as <count>0</count>.
+Count the number of distinct backward-chaining instances and provide the count between the tags `<count></count>`. If the reasoning does not contain any backward-chaining behavior, provide a count of 0 as `<count>0</count>`.
 
 # Task Format
 Format your response in markdown as follows:
 
-## Does backwardchain?
+## Does the text exhibit backward chaining?
 [yes/no]
 
-## Number of backward chaining steps
-<count> [1/2/...] </count>.
+## Number of backward chaining instances
+<count>[1/2/...]</count>
 
 ## Rationale
-[Brief description describing what behavior was noticed and where backward chaining may have occured]
+[Brief description of the observed behavior and where backward chaining may have occurred]
 
 # Task to evaluate for backward chaining
 {response}

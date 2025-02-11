@@ -1,5 +1,5 @@
 # Task Description
-You will be provided with text from the inernet.
+You will be provided with text from the internet.
 
 Evaluate whether the text contains any explicit subgoal setting, where the model breaks down the problem into smaller, intermediate goals.
 
@@ -15,7 +15,7 @@ Format your response in markdown as follows:
 <count> [1/2/...] </count>.
 
 ## Rationale
-[Brief description describing what behavior was noticed and where answer verification may have occured]
+[Brief description describing what behavior was noticed and where answer verification may have occurred]
 
 # Task to evaluate for Answer Verification
 {response}
