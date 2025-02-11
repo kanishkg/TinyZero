@@ -51,10 +51,12 @@ def main(args):
         ds = ds.select(range(args.start, args.end))
     llm = LLM(
         model='meta-llama/Llama-3.3-70B-Instruct',
+        max_num_seqs=32,
         enable_prefix_caching=True,
         trust_remote_code=True,
         tensor_parallel_size=2,
         gpu_memory_utilization=0.95,
+        tokenizer_mode="auto",
     )
 
     num_batches = math.ceil(len(ds) / args.save_every)
