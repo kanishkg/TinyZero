@@ -27,10 +27,15 @@ def get_prompts(ds, prompt_templates):
     prompts = []
     for example in tqdm(ds['text'], desc="Generating prompts"):
         backtracking_prompt = prompt_templates['backtracking'].format(response=example)
+        backtracking_prompt = [{'role': 'user', 'content': backtracking_prompt}]
         is_solution_prompt = prompt_templates['is_solution'].format(response=example)
+        is_solution_prompt = [{'role': 'user', 'content': is_solution_prompt}]
         verification_prompt = prompt_templates['verification'].format(response=example)
+        verification_prompt = [{'role': 'user', 'content': verification_prompt}]
         subgoal_setting_prompt = prompt_templates['subgoal_setting'].format(response=example)
+        subgoal_setting_prompt = [{'role': 'user', 'content': subgoal_setting_prompt}]
         backward_chaining_prompt = prompt_templates['backward_chaining'].format(response=example)
+        backward_chaining_prompt = [{'role': 'user', 'content': backward_chaining_prompt}]
         prompts += [backtracking_prompt, is_solution_prompt, verification_prompt, subgoal_setting_prompt, backward_chaining_prompt]
     return prompts
 
