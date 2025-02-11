@@ -93,7 +93,7 @@ def main(args):
         batch_end = min((shard_idx + 1) * args.save_every, len(ds))
         
         curr_batch = ds.select(range(batch_start, batch_end))
-        prompts = get_prompts(curr_batch, prompt_templates, tokenizer)
+        prompts = get_prompts(curr_batch, tokenizer, prompt_templates)
 
         sampling_params = SamplingParams(
             max_tokens=256,
