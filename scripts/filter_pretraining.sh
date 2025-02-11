@@ -1,0 +1,2 @@
+ CUDA_VISIBLE_DEVICES=0,1 python pretraining_analysis/relabel_olmo_pretrain_offline.py --user obiwan96 --start 0 --end 15000 --save_every 5000 & \
+CUDA_VISIBLE_DEVICES=2,3 python pretraining_analysis/relabel_olmo_pretrain_offline.py --user obiwan96 --start 15000 --end 30000 --save_every 5000 
