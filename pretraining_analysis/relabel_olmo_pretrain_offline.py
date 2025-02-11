@@ -3,6 +3,7 @@ import os
 import math
 from tqdm import tqdm
 from vllm import LLM, SamplingParams
+from transformers import AutoTokenizer
 import argparse
 
 
@@ -23,7 +24,7 @@ PROMPT_LOC_DICT = {
 }
 
 
-def get_prompts(ds, prompt_templates):
+def get_prompts(ds, tokenizer, prompt_templates):
     prompts = []
     print(len(ds['text']))
     import pdb; pdb.set_trace()
@@ -39,7 +40,12 @@ def get_prompts(ds, prompt_templates):
         backward_chaining_prompt = prompt_templates['backward_chaining'].format(response=example)
         backward_chaining_prompt = [{'role': 'user', 'content': backward_chaining_prompt}]
         prompts += [backtracking_prompt, is_solution_prompt, verification_prompt, subgoal_setting_prompt, backward_chaining_prompt]
-    return prompts
+    new_prompts = [tokenizer.apply_chat_template(
+        p,
+        tokenize=False,
+    ) for p in prompts]
+
+    return new_prompts
 
 def main(args):
     prompt_templates = {
@@ -58,14 +64,15 @@ def main(args):
         ds = ds.select(range(args.start, args.end))
     llm = LLM(
         model='meta-llama/Llama-3.3-70B-Instruct',
+        tokenizer_mode="auto",
         max_num_seqs=32,
         enable_prefix_caching=True,
         trust_remote_code=True,
         tensor_parallel_size=2,
         gpu_memory_utilization=0.95,
-        max_model_len=8192,
         tokenizer_mode="auto",
     )
+    tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.3-70B-Instruct")
 
     num_batches = math.ceil(len(ds) / args.save_every)
     batch_size = args.save_every
@@ -75,7 +82,7 @@ def main(args):
         batch_end = min((shard_idx + 1) * args.save_every, len(ds))
         
         curr_batch = ds.select(range(batch_start, batch_end))
-        prompts = get_prompts(curr_batch, prompt_templates)
+        prompts = get_prompts(curr_batch, prompt_templates, tokenizer)
 
         sampling_params = SamplingParams(
             max_tokens=256,
