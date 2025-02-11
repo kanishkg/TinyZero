@@ -3,15 +3,16 @@ import os
 import math
 from tqdm import tqdm
 from vllm import LLM, SamplingParams
+import argparse
 
 
-flags.DEFINE_integer('start', -1, 'Shard to process')
-flags.DEFINE_integer('end', -1, 'Number of shards to process')
-flags.DEFINE_string('split', 'train', 'Split to process')
-flags.DEFINE_integer('max_examples', 1000000, 'Max examples to process')
-flags.DEFINE_integer('save_every', 10000, 'Save every N examples')
-flags.DEFINE_string('user', 'Asap7772', 'User to push the dataset to')
-FLAGS = flags.FLAGS
+parser = argparse.ArgumentParser()
+parser.add_argument('--start', type=int, default=-1, help='Shard to process')
+parser.add_argument('--end', type=int, default=-1, help='Number of shards to process')
+parser.add_argument('--split', type=str, default='train', help='Split to process')
+parser.add_argument('--max_examples', type=int, default=1000000, help='Max examples to process')
+parser.add_argument('--save_every', type=int, default=10000, help='Save every N examples')
+parser.add_argument('--user', type=str, default='Asap7772', help='User to push the dataset to')
 
 PROMPT_LOC_DICT = {
     'backtracking': './pretraining_analysis/prompts/backtracking_v0.txt',
@@ -33,21 +34,21 @@ def get_prompts(ds, prompt_templates):
         prompts += [backtracking_prompt, is_solution_prompt, verification_prompt, subgoal_setting_prompt, backward_chaining_prompt]
     return prompts
 
-def main():
+def main(args):
     prompt_templates = {
             k: open(v).read() for k, v in PROMPT_LOC_DICT.items()
         }
     for k, v in prompt_templates.items():
         assert '{response}' in v, f'Prompt {k} does not contain {{response}} in {v}'
 
-    ds = datasets.load_dataset('open-web-math/open-web-math', num_proc=os.cpu_count()-2, split=FLAGS.split)
+    ds = datasets.load_dataset('open-web-math/open-web-math', num_proc=os.cpu_count()-2, split=args.split)
         
-    if FLAGS.max_examples > 0:
-        ds = ds.select(range(FLAGS.max_examples))
+    if args.max_examples > 0:
+        ds = ds.select(range(args.max_examples))
     
-    if FLAGS.start >= 0 and FLAGS.end >= 0 and FLAGS.start < FLAGS.end:
-        print('Subsampling the dataset with start={} and end={}'.format(FLAGS.start, FLAGS.end))
-        ds = ds.select(range(FLAGS.start, FLAGS.end))
+    if args.start >= 0 and args.end >= 0 and args.start < args.end:
+        print('Subsampling the dataset with start={} and end={}'.format(args.start, args.end))
+        ds = ds.select(range(args.start, args.end))
     llm = LLM(
         model='meta-llama/Meta-Llama-3.3-70B-Instruct',
         enable_prefix_caching=True,
@@ -56,12 +57,12 @@ def main():
         gpu_memory_utilization=0.95,
     )
 
-    num_batches = math.ceil(len(ds) / FLAGS.save_every)
-    batch_size = FLAGS.save_every
+    num_batches = math.ceil(len(ds) / args.save_every)
+    batch_size = args.save_every
     all_ds = []
     for shard_idx in tqdm(range(num_batches), desc='Shards'):
-        batch_start = shard_idx * FLAGS.save_every
-        batch_end = min((shard_idx + 1) * FLAGS.save_every, len(ds))
+        batch_start = shard_idx * args.save_every
+        batch_end = min((shard_idx + 1) * args.save_every, len(ds))
         
         curr_batch = ds.select(range(batch_start, batch_end))
         prompts = get_prompts(curr_batch, prompt_templates)
@@ -96,11 +97,11 @@ def main():
         # Save the dataset
         try:
             ds_so_far = datasets.concatenate_datasets(all_ds)
-            if FLAGS.start >= 0 and FLAGS.end >= 0 and FLAGS.start < FLAGS.end:
-                suffix = f'_{FLAGS.start}_{FLAGS.end}'
+            if args.start >= 0 and args.end >= 0 and args.start < args.end:
+                suffix = f'_{args.start}_{args.end}'
             else:
                 suffix = ''
-            ds_out_name = f'{FLAGS.user}open_web_math_raw{suffix}'
+            ds_out_name = f'{args.user}open_web_math_raw{suffix}'
             ds_so_far.push_to_hub(ds_out_name)
         except Exception as e:
             print(f'Error saving dataset: {e}')
@@ -108,15 +109,17 @@ def main():
     
     try:
         ds_so_far = datasets.concatenate_datasets(all_ds)
-        if FLAGS.start >= 0 and FLAGS.end >= 0 and FLAGS.start < FLAGS.end:
-            suffix = f'_{FLAGS.start}_{FLAGS.end}'
+        if args.start >= 0 and args.end >= 0 and args.start < args.end:
+            suffix = f'_{args.start}_{args.end}'
         else:
             suffix = ''
-        ds_out_name = f'{FLAGS.user}open_web_math_raw{suffix}'
+        ds_out_name = f'{args.user}open_web_math_raw{suffix}'
         ds.push_to_hub(ds_out_name)
     except Exception as e:
         print(f'Final error saving dataset: {e}')
     print('Done')
     
 if __name__ == '__main__':
-    main()
+
+    args = parser.parse_args()
+    main(args)
