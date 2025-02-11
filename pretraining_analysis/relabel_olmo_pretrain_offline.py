@@ -26,7 +26,7 @@ PROMPT_LOC_DICT = {
 
 def get_prompts(ds, tokenizer, prompt_templates):
     prompts = []
-    tokenized_inputs = tokenizer.encode(ds['text'])
+    tokenized_inputs = tokenizer(ds['text'])
     samples = []
     max_seq_length = 4096
     for e, example in tqdm(enumerate(tokenized_inputs), desc="Truncating prompts"):
