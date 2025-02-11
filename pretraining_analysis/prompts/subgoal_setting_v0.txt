@@ -3,7 +3,7 @@ You will be provided with text from the internet.
 
 Evaluate whether the text contains any explicit subgoal setting, where the model breaks down the problem into smaller, intermediate goals.
 
-If you find any subgoal steps, please count them and provide the count as between the tags <count> </count>. If the chain-of-reasoning does not contain any subgoal setting, please provide a count of 0 as <count>0</count>.
+If you find any subgoal steps, please count them and provide the count as between the tags <count> </count>. If the text does not contain any subgoal setting, please provide a count of 0 as <count>0</count>.
 
 # Task Format
 Format your response in markdown as follows:
