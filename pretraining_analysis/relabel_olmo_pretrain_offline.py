@@ -61,6 +61,7 @@ def main(args):
         trust_remote_code=True,
         tensor_parallel_size=2,
         gpu_memory_utilization=0.95,
+        max_model_len=8192,
         tokenizer_mode="auto",
     )
 
