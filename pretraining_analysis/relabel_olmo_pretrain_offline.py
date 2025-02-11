@@ -25,6 +25,8 @@ PROMPT_LOC_DICT = {
 
 def get_prompts(ds, prompt_templates):
     prompts = []
+    print(len(ds['text']))
+    import pdb; pdb.set_trace()
     for example in tqdm(ds['text'], desc="Generating prompts"):
         backtracking_prompt = prompt_templates['backtracking'].format(response=example)
         backtracking_prompt = [{'role': 'user', 'content': backtracking_prompt}]
