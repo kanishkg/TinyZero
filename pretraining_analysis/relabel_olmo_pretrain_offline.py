@@ -28,6 +28,17 @@ def get_prompts(ds, tokenizer, prompt_templates):
     prompts = []
     print(len(ds['text']))
     import pdb; pdb.set_trace()
+    tokenized_inputs = tokenizer(ds['text'])
+    samples = []
+    max_seq_length = 8192
+    for e, example in tqdm(enumerate(tokenized_inputs), desc="Truncating prompts"):
+        if len(example['input_ids']) > max_seq_length-1024:
+            sample = tokenizer.decode(example[: max_seq_length - 1024])
+            sample = sample[: sample.rfind("\n")]
+            samples += [sample]
+        else:
+            samples += [ds['text'][e]]
+
     for example in tqdm(ds['text'], desc="Generating prompts"):
         backtracking_prompt = prompt_templates['backtracking'].format(response=example)
         backtracking_prompt = [{'role': 'user', 'content': backtracking_prompt}]
@@ -68,9 +79,11 @@ def main(args):
         max_num_seqs=32,
         enable_prefix_caching=True,
         trust_remote_code=True,
-        tensor_parallel_size=2,
+        tensor_parallel_size=4,
         gpu_memory_utilization=0.95,
+        max_seq_len=8192,
     )
+    max_seq_len = 8192
     tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.3-70B-Instruct")
 
     num_batches = math.ceil(len(ds) / args.save_every)
