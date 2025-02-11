@@ -31,7 +31,7 @@ def get_prompts(ds, tokenizer, prompt_templates):
     max_seq_length = 4096
     for e, example in tqdm(enumerate(tokenized_inputs['input_ids']), desc="Truncating prompts"):
         import pdb; pdb.set_trace()
-        if len(example['input_ids']) > max_seq_length-1024:
+        if len(example) > max_seq_length-1024:
             sample = tokenizer.decode(example[: max_seq_length - 1024])
             sample = sample[: sample.rfind("\n")]
             samples += [sample]
