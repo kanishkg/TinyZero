@@ -79,7 +79,7 @@ def main(args):
         max_num_seqs=32,
         enable_prefix_caching=True,
         trust_remote_code=True,
-        tensor_parallel_size=4,
+        tensor_parallel_size=2,
         gpu_memory_utilization=0.95,
         max_model_len=4096,
     )
