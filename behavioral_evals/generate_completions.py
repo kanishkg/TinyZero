@@ -48,7 +48,7 @@ def main():
     dataset = dataset.select(range(args.num_samples))
 
     sampling_params = SamplingParams(
-        max_tokens=1024,
+        max_tokens=2048,
         temperature=args.temperature,
     )
 

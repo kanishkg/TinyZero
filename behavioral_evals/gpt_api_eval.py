@@ -66,12 +66,14 @@ Count the number of distinct backward-chaining instances and provide the count b
                     except Exception as e:
                         print(f"Error reading file {full_path}: {e}")
         else:
-            # Assume input_path is a single file.
             with open(input_path, 'r') as f:
                 data = json.load(f)
                 for item in data:
                     if 'step' not in item:
                         item['step'] = '1'
+                
+            if len(data) > num_samples:
+                data = random.sample(data, num_samples)
         
         
         # Process each problem and write a batch request for each prompt.
