@@ -72,7 +72,7 @@ def main(args):
         assert '{response}' in v, f'Prompt {k} does not contain {{response}} in {v}'
 
     if args.only_subgoal:
-        ds = datasets.load_dataset('Asap7772/open-web-math-none-processed-v2', num_proc=os.cpu_count()-2, split=args.split)
+        ds = datasets.load_dataset('Asap7772/open_web_math_raw_0_1000000', num_proc=os.cpu_count()-2, split=args.split)
     else:
         ds = datasets.load_dataset('open-web-math/open-web-math', num_proc=os.cpu_count()-2, split=args.split)
         
