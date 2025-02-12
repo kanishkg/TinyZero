@@ -147,12 +147,13 @@ def main():
     fieldnames = list(rows[0].keys())
     # Write the flattened data to CSV.
     try:
-        with open(args.output, 'w', newline='') as csvfile:
+        with open(args.output, 'a', newline='') as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-            writer.writeheader()
+            if csvfile.tell() == 0:
+                writer.writeheader()
             for row in rows:
                 writer.writerow(row)
-        print(f"Wrote {len(rows)} rows to {args.output}")
+        print(f"Appended {len(rows)} rows to {args.output}")
     except Exception as e:
         print(f"Error writing output file: {e}", file=sys.stderr)
         sys.exit(1)
