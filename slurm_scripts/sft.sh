@@ -42,7 +42,8 @@ for condition in "${conditions[@]}"; do
   train_file="${base_data_path}/${condition}/train.parquet"
   val_file="${base_data_path}/${condition}/test.parquet"
 
-  experiment_name="countdown-sft-llama-3-2-3b-${condition}"
+  experiment_name="countdown-sft-${model_name}-${condition}"
+
   save_dir="${default_local_dir}/${condition}"
 
   echo "Running training for condition: ${condition}"

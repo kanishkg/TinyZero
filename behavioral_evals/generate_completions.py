@@ -116,5 +116,6 @@ def main():
         torch.cuda.empty_cache()  # Clear CUDA cache
         torch.distributed.destroy_process_group()  # Destroy the process group
 
+
 if __name__ == "__main__":
     main()
