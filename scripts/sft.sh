@@ -37,7 +37,7 @@ max_length=4096
 default_hdfs_dir="/home/anikait.singh/rl_behaviors/hdfs"
 default_local_dir="/home/anikait.singh/rl_behaviors/sft"
 project_name="countdown-pretraineddata-sft"
-total_epochs=5
+total_epochs=1
 logger="['console','wandb']"
 lr=1e-5
 
@@ -54,11 +54,14 @@ for condition in "${conditions[@]}"; do
       exp_num=$((exp_num+1))
       continue
   fi
+  
   train_file="${base_data_path}/${condition}/train.parquet"
   val_file="${base_data_path}/${condition}/test.parquet"
 
-  experiment_name="countdown-pretraineddata-sft-${model_name}-${condition}"
-  save_dir="${default_local_dir}/${condition}"
+  model_name_short=$(echo $model_name | cut -d'/' -f2)
+  experiment_name="countdown-pretraineddata-sft-${model_name_short}-${condition}"
+  save_dir="${default_local_dir}/${model_name_short}/${condition}"
+  mkdir -p $save_dir
 
   echo "Running training for condition: ${condition}"
   echo "Train file: ${train_file}"
