@@ -71,7 +71,7 @@ def main(args):
     for k, v in prompt_templates.items():
         assert '{response}' in v, f'Prompt {k} does not contain {{response}} in {v}'
 
-    if args.subgoal_setting:
+    if args.only_subgoal:
         ds = datasets.load_dataset('Asap7772/open-web-math-none-processed-v2', num_proc=os.cpu_count()-2, split=args.split)
     else:
         ds = datasets.load_dataset('open-web-math/open-web-math', num_proc=os.cpu_count()-2, split=args.split)
