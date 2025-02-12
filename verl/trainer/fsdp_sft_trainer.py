@@ -220,9 +220,9 @@ class FSDPSFTTrainer(object):
         labels = batch['input_ids'][:, 1:].cuda()
 
         with torch.autocast(device_type='cuda', dtype=torch.bfloat16):
-            output = self.fsdp_model(input_ids=batch['input_ids'],
-                                     attention_mask=batch['attention_mask'],
-                                     position_ids=batch['position_ids'],
+            output = self.fsdp_model(input_ids=batch['input_ids'].long(),
+                                     attention_mask=batch['attention_mask'].long(),
+                                     position_ids=batch['position_ids'].long(),
                                      use_cache=False)  # prevent model thinks it it generating
 
         logits = output.logits
@@ -234,7 +234,7 @@ class FSDPSFTTrainer(object):
         shift_logits = shift_logits.view(-1, self.model.config.vocab_size)
         shift_labels = shift_labels.view(-1)
         # Enable model parallelism
-        shift_labels = shift_labels.to(shift_logits.device)
+        shift_labels = shift_labels.to(shift_logits.device).long()
         loss = loss_fct(shift_logits, shift_labels)
         loss = loss * loss_mask
 
