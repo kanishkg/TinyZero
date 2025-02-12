@@ -8,16 +8,16 @@ If you find any subgoal steps, please count them and provide the count as betwee
 # Task Format
 Format your response in markdown as follows:
 
-## Does answer verification?
+## Does subgoal setting?
 [yes/no]
 
-## Number of answer verification steps
+## Number of subgoal setting steps
 <count> [1/2/...] </count>.
 
 ## Rationale
-[Brief description describing what behavior was noticed and where answer verification may have occurred]
+[Brief description describing what behavior was noticed and where subgoal setting may have occurred]
 
-# Task to evaluate for Answer Verification
+# Task to evaluate for Subgoal Setting
 {response}
 
 # Response
