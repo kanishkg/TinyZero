@@ -1,6 +1,8 @@
 import argparse
 import subprocess
 
+# conda activate myenv; python /home/anikait.singh/TinyZero/pretraining_analysis/scripts.py --node 0
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--start', type=int, default=200000,
