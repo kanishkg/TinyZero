@@ -143,7 +143,7 @@ def main(args):
                 outputs_dict['backward_chaining_raw'][batch_idx] = output
 
         if args.only_subgoal:
-            curr_batch = curr_batch.add_column('subgoal_setting_raw', outputs_dict['subgoal_setting_raw'])
+            curr_batch = curr_batch.add_column('subgoal_setting_relabeled', outputs_dict['subgoal_setting_raw'])
         else:
             curr_batch = curr_batch.add_column('backtracking_raw', outputs_dict['backtracking_raw'])
             curr_batch = curr_batch.add_column('is_solution_raw', outputs_dict['is_solution_raw'])
