@@ -11,9 +11,10 @@ parser = argparse.ArgumentParser()
 parser.add_argument('--start', type=int, default=-1, help='Shard to process')
 parser.add_argument('--end', type=int, default=-1, help='Number of shards to process')
 parser.add_argument('--split', type=str, default='train', help='Split to process')
-parser.add_argument('--max_examples', type=int, default=1000000, help='Max examples to process')
+parser.add_argument('--max_examples', type=int, default=-1, help='Max examples to process')
 parser.add_argument('--save_every', type=int, default=10000, help='Save every N examples')
 parser.add_argument('--user', type=str, default='Asap7772', help='User to push the dataset to')
+parser.add_argument('--only_subgoal', action='store_true', help='Only generate subgoal setting prompts')
 
 PROMPT_LOC_DICT = {
     'backtracking': './pretraining_analysis/prompts/backtracking_v0.txt',
@@ -38,6 +39,11 @@ def get_prompts(ds, tokenizer, prompt_templates):
             samples += [ds['text'][e]]
 
     for example in tqdm(samples, desc="Generating prompts"):
+        if args.only_subgoal:
+            subgoal_setting_prompt = prompt_templates['subgoal_setting'].format(response=example)
+            subgoal_setting_prompt = [{'role': 'user', 'content': subgoal_setting_prompt}]
+            prompts += [subgoal_setting_prompt]
+            continue
         backtracking_prompt = prompt_templates['backtracking'].format(response=example)
         backtracking_prompt = [{'role': 'user', 'content': backtracking_prompt}]
         is_solution_prompt = prompt_templates['is_solution'].format(response=example)
@@ -60,10 +66,15 @@ def main(args):
     prompt_templates = {
             k: open(v).read() for k, v in PROMPT_LOC_DICT.items()
         }
+    if args.only_subgoal:
+        prompt_templates = {'subgoal_setting': prompt_templates['subgoal_setting']}
     for k, v in prompt_templates.items():
         assert '{response}' in v, f'Prompt {k} does not contain {{response}} in {v}'
 
-    ds = datasets.load_dataset('open-web-math/open-web-math', num_proc=os.cpu_count()-2, split=args.split)
+    if args.only_subgoal:
+        ds = datasets.load_dataset('Asap7772/open_web_math_raw_0_1000000', num_proc=os.cpu_count()-2, split=args.split)
+    else:
+        ds = datasets.load_dataset('open-web-math/open-web-math', num_proc=os.cpu_count()-2, split=args.split)
         
     if args.max_examples > 0:
         ds = ds.select(range(args.max_examples))
@@ -99,16 +110,25 @@ def main(args):
         )
         responses = llm.generate(prompts, sampling_params=sampling_params)
 
-        outputs_dict = {
-            'backtracking_raw': [None] * len(curr_batch),
-            'is_solution_raw': [None] * len(curr_batch),
-            'verification_raw': [None] * len(curr_batch),
-            'subgoal_setting_raw': [None] * len(curr_batch),
-            'backward_chaining_raw': [None] * len(curr_batch)
-        }
+        if args.only_subgoal:
+            outputs_dict = {
+                'subgoal_setting_raw': [None] * len(curr_batch),
+            }
+
+        else:
+            outputs_dict = {
+                'backtracking_raw': [None] * len(curr_batch),
+                'is_solution_raw': [None] * len(curr_batch),
+                'verification_raw': [None] * len(curr_batch),
+                'subgoal_setting_raw': [None] * len(curr_batch),
+                'backward_chaining_raw': [None] * len(curr_batch)
+            }
         
         for i, response in enumerate(responses):
             output = response.outputs[0].text.strip()
+            if args.only_subgoal:
+                outputs_dict['subgoal_setting_raw'][i] = output
+                continue
             idx = i % 5
             batch_idx = i // 5
             if idx == 0:
@@ -122,11 +142,14 @@ def main(args):
             elif idx == 4:
                 outputs_dict['backward_chaining_raw'][batch_idx] = output
 
-        curr_batch = curr_batch.add_column('backtracking_raw', outputs_dict['backtracking_raw'])
-        curr_batch = curr_batch.add_column('is_solution_raw', outputs_dict['is_solution_raw'])
-        curr_batch = curr_batch.add_column('verification_raw', outputs_dict['verification_raw'])
-        curr_batch = curr_batch.add_column('subgoal_setting_raw', outputs_dict['subgoal_setting_raw'])
-        curr_batch = curr_batch.add_column('backward_chaining_raw', outputs_dict['backward_chaining_raw'])
+        if args.only_subgoal:
+            curr_batch = curr_batch.add_column('subgoal_setting_relabeled', outputs_dict['subgoal_setting_raw'])
+        else:
+            curr_batch = curr_batch.add_column('backtracking_raw', outputs_dict['backtracking_raw'])
+            curr_batch = curr_batch.add_column('is_solution_raw', outputs_dict['is_solution_raw'])
+            curr_batch = curr_batch.add_column('verification_raw', outputs_dict['verification_raw'])
+            curr_batch = curr_batch.add_column('subgoal_setting_raw', outputs_dict['subgoal_setting_raw'])
+            curr_batch = curr_batch.add_column('backward_chaining_raw', outputs_dict['backward_chaining_raw'])
 
         all_ds.append(curr_batch)
         
@@ -137,6 +160,8 @@ def main(args):
                 suffix = f'_{args.start}_{args.end}'
             else:
                 suffix = ''
+            if args.only_subgoal:
+                suffix += '_subgoal'
             ds_out_name = f'{args.user}open_web_math_raw{suffix}'
             ds_so_far.push_to_hub(ds_out_name)
         except Exception as e:
@@ -149,6 +174,8 @@ def main(args):
             suffix = f'_{args.start}_{args.end}'
         else:
             suffix = ''
+        if args.only_subgoal:
+            suffix += '_subgoal'
         ds_out_name = f'{args.user}open_web_math_raw{suffix}'
         ds.push_to_hub(ds_out_name)
     except Exception as e:
