@@ -41,29 +41,30 @@ def get_prompts(ds, tokenizer, prompt_templates):
     return new_prompts
 
 def parse_output(output):
-    query_match = re.search(r'<query>(.*?)</query>', output, re.DOTALL)
-    think_match = re.search(r'<think>(.*?)</think>', output, re.DOTALL)
+    query_match = re.search(r'<question>(.*?)</question>', output, re.DOTALL)
+    think_match = re.search(r'<thoughts>(.*?)</thoughts>', output, re.DOTALL)
     answer_match = re.search(r'<answer>(.*?)</answer>', output, re.DOTALL)
     
     query = query_match.group(1) if query_match else ""
     think = think_match.group(1) if think_match else ""
     answer = answer_match.group(1) if answer_match else ""
     
-    completion = f"<think>{think}</think>\n<answer>{answer}<\answer>" if think or answer else ""
+    completion = f"<think>{think}</think>\n<answer>{answer}</answer>" if think or answer else ""
     return query, completion
 
 def main(args):
     prompt_templates = {
-        'qa': """Your goal is to split the text into a query, thought and an answer.
+        'qa': """Your goal is to split the text into a question, thought and an answer.
 
-Make sure that the question is in the text written. 
-Make sure that the answer and the process to get to the answer are in the text. Do not change the wording of either.
+Make sure that the question is in the text. 
+Make sure that the answer and the process of the writer to get to the answer are in the text. Do not change the wording of either.
 Your goal is to copy and paste the question, the process and the answer into the correct sections.
 
-Write the question in <query>...</query>.
+Write the question in <question>...</question>.
 For the answer, split the answer into the process towards reaching the answer and the final answer.
-Write the process in <think>...</think> and the final answer in <answer>...</answer>.
+Write the process in <thoughts>thinking process of the writer</thoughts> and the final answer in <answer>...</answer>.
 
+Directly copy, do not change the text.
 Here is the text:
 <text>
 {response}
@@ -130,7 +131,7 @@ Here is the text:
                 suffix = f'_{args.start}_{args.end}'
             else:
                 suffix = ''
-            ds_out_name = f'{args.user}open_web_math_raw_qa{suffix}'
+            ds_out_name = f'{args.user}open_web_math_qa{suffix}'
             ds_so_far.push_to_hub(ds_out_name)
         except Exception as e:
             print(f'Error saving dataset: {e}')
