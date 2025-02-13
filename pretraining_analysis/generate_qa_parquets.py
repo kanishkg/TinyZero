@@ -12,7 +12,10 @@ data_names = [
 all_ds = []
 for data_name in data_names:
     ds = datasets.load_dataset(data_name)
+    # use train split
+    ds = ds['train']
     all_ds.append(ds)
+
 
 ds = datasets.concatenate_datasets(all_ds)
 
