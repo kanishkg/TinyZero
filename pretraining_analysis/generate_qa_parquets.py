@@ -17,7 +17,9 @@ for data_name in data_names:
 ds = datasets.concatenate_datasets(all_ds)
 
 # filter out empty completions and queries
+print(f"Number of examples: {len(ds)}")
 ds = ds.filter(lambda x: len(x['query']) > 0 and len(x['completion']) > 0)
+print(f"Number of examples: {len(ds)}")
 
 prefix = """A conversation between User and Assistant. The user asks a question, and the Assistant solves it. The assistant first thinks about the reasoning process in the mind and then provides the user with the answer.
 User: {query} Show your work in <think> </think> tags. And return the final answer in <answer> </answer> tags.
@@ -29,5 +31,5 @@ ds = ds.map(lambda x: {'query': prefix.format(query=x['query']), 'completion': x
 # delete all columns except query and completion
 ds = ds.remove_columns([col for col in ds.column_names if col not in ['query', 'completion']])
 
-ds_out_name = 'obiwan96/obiwan96open_web_math_qa'
+ds_out_name = 'obiwan96/obiwan96open_web_math_qa_bactrack'
 ds.push_to_hub(ds_out_name)
