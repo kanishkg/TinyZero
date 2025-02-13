@@ -82,16 +82,16 @@ Here is the text:
         print('Subsampling the dataset with start={} and end={}'.format(args.start, args.end))
         ds = ds.select(range(args.start, args.end))
     llm = LLM(
-        model='meta-llama/Llama-3.3-70B-Instruct',
+        model='Qwen/Qwen2.5-32B-Instruct',
         tokenizer_mode="auto",
-        max_num_seqs=32,
+        max_num_seqs=64,
         enable_prefix_caching=True,
         trust_remote_code=True,
         tensor_parallel_size=2,
         gpu_memory_utilization=0.95,
         max_model_len=8192,
     )
-    tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.3-70B-Instruct")
+    tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen2.5-32B-Instruct")
 
     num_batches = math.ceil(len(ds) / args.save_every)
     all_ds = []
