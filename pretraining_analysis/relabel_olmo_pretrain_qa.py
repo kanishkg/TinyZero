@@ -56,26 +56,18 @@ def main(args):
     prompt_templates = {
         'qa': """Your goal is to split the text into a query, thought and an answer.
 
-Make sure that the question is in the text. Do not change the wording of the question too much.
-Make sure that the answer and the process to get to the answer are in the text. Do not change the wording of either too much.
+Make sure that the question is in the text written. 
+Make sure that the answer and the process to get to the answer are in the text. Do not change the wording of either.
+Your goal is to copy and paste the question, the process and the answer into the correct sections.
 
 Write the question in <query>...</query>.
 For the answer, split the answer into the process towards reaching the answer and the final answer.
 Write the process in <think>...</think> and the final answer in <answer>...</answer>.
 
-Do not change the text too much.
-Here is a simple example:
-<query>What is the value of x if 5x+1=6</query>
-<think>5x+1=6
-5x=6-1
-5x=5
-x=5/5
-x=1</think>
-<answer>1</answer>
-
 Here is the text:
-
-{response}"""
+<text>
+{response}
+</text>"""
 }
     for k, v in prompt_templates.items():
         assert '{response}' in v, f'Prompt {k} does not contain {{response}} in {v}'
