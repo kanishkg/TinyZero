@@ -61,7 +61,7 @@ User: Using the numbers {numbers}, create an equation that equals {target}. You 
 Assistant: Let me solve this step by step.
 <think>"""
     elif template_type == 'base-2':
-        prefix = f"""Using the numbers {numbers}, create an equation that equals {target}. You can use basic arithmetic operations (+, -, *, /) and each number can only be used once. Show your work in <think> </think> tags. And return the final answer in <answer> </answer> tags.
+        prefix = f"""Using the numbers {numbers}, create an equation that equals {target}. You can use basic arithmetic operations (+, -, *, /) and each number can only be used once. Show your work in <think> </think> tags. And return the final answer in <answer> </answer> tags. For example, <answer> (1 + 2) / 3 </answer>.
 Let me see if I can solve this step by step.
 <think>"""
     elif template_type == 'qwen-instruct':
