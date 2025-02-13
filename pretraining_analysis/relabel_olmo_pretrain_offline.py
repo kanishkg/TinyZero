@@ -177,7 +177,7 @@ def main(args):
         if args.only_subgoal:
             suffix += '_subgoal'
         ds_out_name = f'{args.user}open_web_math_raw{suffix}'
-        ds.push_to_hub(ds_out_name)
+        ds_so_far.push_to_hub(ds_out_name)
     except Exception as e:
         print(f'Final error saving dataset: {e}')
     print('Done')

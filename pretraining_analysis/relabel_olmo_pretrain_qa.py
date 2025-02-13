@@ -144,7 +144,7 @@ Here is the text:
         else:
             suffix = ''
         ds_out_name = f'{args.user}open_web_math_qa{suffix}'
-        ds.push_to_hub(ds_out_name)
+        ds_so_far.push_to_hub(ds_out_name)
     except Exception as e:
         print(f'Final error saving dataset: {e}')
     print('Done')
