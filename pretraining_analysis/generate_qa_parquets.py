@@ -32,5 +32,8 @@ ds = ds.map(lambda x: {'query': prefix.format(query=x['query']), 'completion': x
 # delete all columns except query and completion
 ds = ds.remove_columns([col for col in ds.column_names if col not in ['query', 'completion']])
 
+# create train and validation splits
+ds = ds.train_test_split(test_size=0.05)
+
 ds_out_name = 'obiwan96/obiwan96open_web_math_qa_bactrack'
 ds.push_to_hub(ds_out_name)
