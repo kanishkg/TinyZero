@@ -107,11 +107,13 @@ Here is the text:
         
         curr_batch = ds.select(range(batch_start, batch_end))
         prompts = get_prompts(curr_batch, tokenizer, prompt_templates)
-
+        print("processsing len(prompts): ", len(prompts))
         sampling_params = SamplingParams(
             max_tokens=4096+1024,
             temperature=0,
         )
+
+        import pdb; pdb.set_trace()
         responses = llm.generate(prompts, sampling_params=sampling_params)
 
         outputs_dict = {
