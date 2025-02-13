@@ -30,7 +30,7 @@ def get_prompts(ds, tokenizer, prompt_templates):
             samples += [ds['text'][e]]
 
     for example in tqdm(samples, desc="Generating prompts"):
-        prompt = prompt_templates['qa'].format(response=example)
+        prompt = prompt_templates['qa'] + f"\n<text>\n{example}\n</text>"
         prompt = [{'role': 'user', 'content': prompt}]
         prompts += [prompt]
   
@@ -76,10 +76,7 @@ And this is how you should split it:
 <thoughts>I'm struggling as to what equations to use, I've tried using KE, assuming that the KE in the system is the same for both the Proton and the Electron, but that didn't work. I've also tried to find the magnitude of the electric field and work back to a kinematic equation, I'm so stuck . I could really just use some guidance as to where to start. Last edited by a moderator: Feb 28, 2017 2. Feb 28, 2017 ### Staff: Mentor Hi Kmol6, Since you don't know anything about the dimensions of the capacitor you're not likely to have much luck finding the electric field. When you say that you tried using KE, what does that mean exactly? What equations did you use (Hence the importance of the Relevant equations section of the formatting template)? Can you show your attempt? 3. Feb 28, 2017 ### Kmol6 KEi + PEi = KEf+PEf 1/2mv^2 +mgh= 1/2mv^2 + mgh 1/2(9.11x10^-31kg)(51000)^2 + 0 = 1/2 (1.67X10^-27)(V)^2 +0 Vf=1284 m/s 4. Feb 28, 2017 ### Staff: Mentor You've swapped the roles of the proton and electron. It was the proton that went first and ended up with a speed of 51000 m/s. Since it's not the conditions of the same particle that you are comparing, the conservation of energy law is not where you should start. What you're looking for is the formula that gives the work done on a charge falling through a given potential difference, hence the energy imparted. You can then claim that since the charges on the electron and proton are identical, they must both gain the same amount of kinetic energy. Then you can equate the KE's of each. 5. Feb 28, 2017 ### Kmol6 1/2mv^2=qDeltaV? Then sub the answer for delta V into DeltaU=qDeltaV using q as 1.602X10^-19C and then plug Delta U into 1/2mv^2=DeltaU and solve for v^2 of the electron? (I think systematically, combining equations isn't easy for me) I got 2.2X10^6m/s ? 6. Feb 28, 2017 ### Staff: Mentor That's the idea. Your result looks good. Note that since qΔV is the same for both particles you can write: $\frac{1}{2} m_ev_e^2 = q ΔV = \frac{1}{2} m_pv_p^2$ $m_ev_e^2 = m_pv_p^2$ $v_e = \sqrt{\frac{m_p}{m_e}}v_p$ 7. Feb 28, 2017 ### Kmol6 Thank you!!!!!</thoughts>
 <answer>2.2X10^6m/s</answer>
 
-Now do it for this text:
-<text>
-{response}
-</text>"""
+Now do it for this text:"""
 }
     for k, v in prompt_templates.items():
         assert '{response}' in v, f'Prompt {k} does not contain {{response}} in {v}'
