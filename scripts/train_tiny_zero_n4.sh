@@ -29,6 +29,6 @@ trainer.project_name=behavior_amplification \
 trainer.experiment_name=$EXPERIMENT_NAME \
 trainer.save_freq=5 \
 trainer.test_freq=10 \
-trainer.default_local_dir=/scr/kanishkg/ba/models/$EXPERIMENT_NAME \
+trainer.default_local_dir=/home/anikait.singh/rl_behaviors/ppo/$EXPERIMENT_NAME \
 trainer.total_epochs=15 2>&1 | tee verl_demo.log
 

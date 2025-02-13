@@ -12,26 +12,41 @@ export HF_DATASETS_CACHE=$hf_cache_dir
 export HF_TOKEN='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'
 
 models=(
-    # qhduan/aquila-7b
-    # Qwen/Qwen2.5-3B
-    # allenai/OLMo-1B-hf
-    # google/gemma-2b
-    allenai/OLMo-7B-hf
-    meta-llama/Llama-2-7b
+    /home/anikait.singh/rl_behaviors/sft/OLMo-7B-hf/backtrack/global_step_500
+    /home/anikait.singh/rl_behaviors/sft/OLMo-7B-hf/baseline/global_step_500
+    /home/anikait.singh/rl_behaviors/sft/OLMo-7B-hf/negative/global_step_500
+    /home/anikait.singh/rl_behaviors/sft/OLMo-7B-hf/method/global_step_500
+
+    /home/anikait.singh/rl_behaviors/sft/Llama-3.2-3B/backtrack/global_step_500
+    /home/anikait.singh/rl_behaviors/sft/Llama-3.2-3B/baseline/global_step_500
+    /home/anikait.singh/rl_behaviors/sft/Llama-3.2-3B/negative/global_step_500
+    /home/anikait.singh/rl_behaviors/sft/Llama-3.2-3B/method/global_step_500
 )
 num_models=${#models[@]}
 names=(
-    # countdown-aquila7b
-    # countdown-qwen2.5-3b
-    # countdown-olmo1b
-    # countdown-gemma2b
-    countdown-olmo7b
-    countdown-llama2-7b
+    countdown-olmo7b-pretdata-backtrack
+    countdown-olmo7b-pretdata-baseline
+    countdown-olmo7b-pretdata-negative
+    countdown-olmo7b-pretdata-method
+
+    countdown-llama3b-pretdata-backtrack
+    countdown-llama3b-pretdata-baseline
+    countdown-llama3b-pretdata-negative
+    countdown-llama3b-pretdata-method
 )
 num_names=${#names[@]}
-data_dir="/raid0/data_countdown"
+data_dir="/home/anikait.singh/rl_behaviors/data_countdown"
 
-gpus=("0,1,2,3" "4,5,6,7")
+gpus=(
+    "0,1,2,3,4,5,6,7"
+    "0,1,2,3,4,5,6,7"
+    "0,1,2,3,4,5,6,7"
+    "0,1,2,3,4,5,6,7"
+    "0,1,2,3,4,5,6,7"
+    "0,1,2,3,4,5,6,7"
+    "0,1,2,3,4,5,6,7"
+    "0,1,2,3,4,5,6,7"
+)
 num_gpus=${#gpus[@]}
 
 if [ $num_models -ne $num_names ]; then
@@ -57,7 +72,7 @@ for i in $(seq 0 $((num_models-1))); do
         continue
     fi
 
-    export N_GPUS=4
+    export N_GPUS=8
     export BASE_MODEL=${models[$i]}
     export DATA_DIR=$data_dir
     export ROLLOUT_TP_SIZE=2
@@ -65,7 +80,7 @@ for i in $(seq 0 $((num_models-1))); do
     export VLLM_ATTENTION_BACKEND=XFORMERS
     export CUDA_VISIBLE_DEVICES=${gpus[$i]}
 
-    command="bash ./scripts/train_tiny_zero.sh"
+    command="bash ./scripts/train_tiny_zero_n4.sh"
     echo "Using GPU: $CUDA_VISIBLE_DEVICES"
     echo $command
     if [ $dry_run = true ]; then

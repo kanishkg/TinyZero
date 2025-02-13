@@ -13,12 +13,10 @@ export HF_TOKEN='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'
 
 # List of dataset conditions
 conditions=(
-  negative_control
-  only_backtracking
-  backtracking_verification
-  backtracking_subgoal
-  backtracking_backward
-  all_strategies
+  backtrack
+  baseline
+  method
+  negative
 )
 
 model_names=(
@@ -27,29 +25,43 @@ model_names=(
 )
 
 # Base path for dataset files
-base_data_path="/home/anikait.singh/rl_behaviors/cot_datasets/processed_data"
+base_data_path="/home/anikait.singh/rl_behaviors/cot_datasets/pretrained_data"
 
 # Shared training parameters
 prompt_key="query"
 response_key="completion"
 micro_batch_size=16
 train_batch_size=80
-max_length=2048
+# max_length=2048
+max_length=4096
 default_hdfs_dir="/home/anikait.singh/rl_behaviors/hdfs"
 default_local_dir="/home/anikait.singh/rl_behaviors/sft"
-project_name="countdown-sft"
-total_epochs=5
+project_name="countdown-pretraineddata-sft"
+total_epochs=1
 logger="['console','wandb']"
 lr=1e-5
 
+exp_num=0
+dry_run=false
+which_exp=${1:--1}
+if [ $which_exp -eq -1 ]; then
+    echo "Running all experiments" 
+fi
 # Iterate over each condition and launch a training job
-for condition in "${conditions[@]}"; do
 for model_name in "${model_names[@]}"; do
+for condition in "${conditions[@]}"; do
+  if [ $which_exp -ne -1 ] && [ $exp_num -ne $which_exp ]; then
+      exp_num=$((exp_num+1))
+      continue
+  fi
+  
   train_file="${base_data_path}/${condition}/train.parquet"
   val_file="${base_data_path}/${condition}/test.parquet"
 
-  experiment_name="countdown-sft-${model_name}-${condition}"
-  save_dir="${default_local_dir}/${condition}"
+  model_name_short=$(echo $model_name | cut -d'/' -f2)
+  experiment_name="countdown-pretraineddata-sft-${model_name_short}-${condition}"
+  save_dir="${default_local_dir}/${model_name_short}/${condition}"
+  mkdir -p $save_dir
 
   echo "Running training for condition: ${condition}"
   echo "Train file: ${train_file}"
@@ -65,6 +77,7 @@ for model_name in "${model_names[@]}"; do
     data.micro_batch_size="${micro_batch_size}" \
     data.train_batch_size="${train_batch_size}" \
     data.max_length="${max_length}" \
+    data.truncation='right' \
     model.partial_pretrain="${model_name}" \
     trainer.default_hdfs_dir="${default_hdfs_dir}" \
     trainer.default_local_dir="${save_dir}" \
@@ -72,7 +85,9 @@ for model_name in "${model_names[@]}"; do
     trainer.experiment_name="${experiment_name}" \
     trainer.total_epochs="${total_epochs}" \
     trainer.logger="${logger}" \
-    optim.lr="${lr}" \
+    optim.lr="${lr}" 
   echo "--------------------------------------------------"
+
+  exp_num=$((exp_num+1))
 done
 done
