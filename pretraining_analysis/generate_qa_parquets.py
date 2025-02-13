@@ -40,3 +40,7 @@ ds = ds.train_test_split(test_size=0.05)
 
 ds_out_name = 'obiwan96/obiwan96open_web_math_qa_bactrack'
 ds.push_to_hub(ds_out_name)
+
+# save as train.parquet and test.parquet
+ds['train'].to_parquet('train.parquet')
+ds['test'].to_parquet('test.parquet')

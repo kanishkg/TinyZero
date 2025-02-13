@@ -13,7 +13,7 @@ def extract_solution(solution_str):
         solution_str = solution_str.split("<|im_start|>assistant", 1)[1]
     if "Let me see if I can solve this step by step." in solution_str:
         solution_str = solution_str.split("Let me see if I can solve this step by step.", 1)[1]
-    solution_str = solution_str.split('\n')[-1]
+    # solution_str = solution_str.split('\n')[-1]
 
     answer_pattern = r'<answer>(.*?)</answer>'
     match = re.finditer(answer_pattern, solution_str)
