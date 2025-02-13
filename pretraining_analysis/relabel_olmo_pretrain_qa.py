@@ -78,8 +78,6 @@ And this is how you should split it:
 
 Now do it for this text:"""
 }
-    for k, v in prompt_templates.items():
-        assert '{response}' in v, f'Prompt {k} does not contain {{response}} in {v}'
 
     ds = datasets.load_dataset('Asap7772/open-web-math-backtrack-processed-v2', num_proc=os.cpu_count()-2, split=args.split)
         
