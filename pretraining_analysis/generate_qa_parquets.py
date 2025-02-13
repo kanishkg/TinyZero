@@ -23,5 +23,11 @@ prefix = """A conversation between User and Assistant. The user asks a question,
 User: {query} Show your work in <think> </think> tags. And return the final answer in <answer> </answer> tags.
 Assistant: Let me solve this step by step."""
 
+# add prefix to query
+ds = ds.map(lambda x: {'query': prefix.format(query=x['query']), 'completion': x['completion']})
+
+# delete all columns except query and completion
+ds = ds.remove_columns([col for col in ds.column_names if col not in ['query', 'completion']])
+
 ds_out_name = 'obiwan96/obiwan96open_web_math_qa'
 ds.push_to_hub(ds_out_name)
