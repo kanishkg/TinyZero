@@ -38,7 +38,7 @@ ds = ds.remove_columns([col for col in ds.column_names if col not in ['query', '
 # create train and validation splits
 ds = ds.train_test_split(test_size=0.05)
 
-ds_out_name = 'obiwan96/obiwan96open_web_math_qa_bactrack'
+ds_out_name = 'obiwan96/obiwan96open_web_math_qav2_bactrack'
 ds.push_to_hub(ds_out_name)
 
 # save as train.parquet and test.parquet
