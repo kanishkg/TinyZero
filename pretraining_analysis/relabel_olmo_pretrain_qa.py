@@ -154,7 +154,7 @@ Directly copy, do not change the text.
                 suffix = f'_{args.start}_{args.end}'
             else:
                 suffix = ''
-            ds_out_name = f'{args.user}open_web_math_qa{suffix}'
+            ds_out_name = f'{args.user}open_web_math_qav2{suffix}'
             ds_so_far.push_to_hub(ds_out_name)
         except Exception as e:
             print(f'Error saving dataset: {e}')
@@ -166,7 +166,7 @@ Directly copy, do not change the text.
             suffix = f'_{args.start}_{args.end}'
         else:
             suffix = ''
-        ds_out_name = f'{args.user}open_web_math_qa{suffix}'
+        ds_out_name = f'{args.user}open_web_math_qav2{suffix}'
         ds_so_far.push_to_hub(ds_out_name)
     except Exception as e:
         print(f'Final error saving dataset: {e}')
