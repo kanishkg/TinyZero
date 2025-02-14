@@ -90,7 +90,9 @@ Subgoal setting: The process of setting smaller goals to reach the final answer.
 
 Write the question in <question>...</question>.
 For the answer, split the answer into the process towards reaching the answer and the final answer.
-Write the process in <thoughts>thinking process of the writer with backtracking etc.</thoughts> and the final answer in <answer>...</answer>.
+Write the process in <thoughts>thinking process of the author with backtracking etc.</thoughts> and the final answer in <answer>...</answer>.
+Use first person pronouns like "I" and "me" to refer to the author.
+So, the thoughts should be in the first person, and should look like the author is thinking out loud. Eg: "I think I should try this next."
 Now do it for this text:""",
 }
 
