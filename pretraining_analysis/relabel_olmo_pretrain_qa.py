@@ -91,9 +91,7 @@ Subgoal setting: The process of setting smaller goals to reach the final answer.
 Write the question in <question>...</question>.
 For the answer, split the answer into the process towards reaching the answer and the final answer.
 Write the process in <thoughts>thinking process of the writer with backtracking etc.</thoughts> and the final answer in <answer>...</answer>.
-
-Directly copy, do not change the text.
-"""
+Now do it for this text:""",
 }
 
     ds = datasets.load_dataset('Asap7772/open-web-math-backtrack-processed-v2', num_proc=os.cpu_count()-2, split=args.split)
