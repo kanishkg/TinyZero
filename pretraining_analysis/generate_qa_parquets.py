@@ -3,10 +3,10 @@ import datasets
 
 
 data_names = [
-    'obiwan96/obiwan96open_web_math_qa_0_11616', 
-    'obiwan96/obiwan96open_web_math_qa_11616_23232',
-    'obiwan96/obiwan96open_web_math_qa_23232_34848',
-    'obiwan96/obiwan96open_web_math_qa_34848_46467',
+    'obiwan96/obiwan96open_web_math_qav2_0_11616', 
+    'obiwan96/obiwan96open_web_math_qav2_11616_23232',
+    'obiwan96/obiwan96open_web_math_qav2_23232_34848',
+    'obiwan96/obiwan96open_web_math_qav2_34848_46467',
 ]
 
 all_ds = []
