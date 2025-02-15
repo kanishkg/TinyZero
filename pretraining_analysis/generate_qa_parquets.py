@@ -36,11 +36,10 @@ print(f"Number of examples: {len(ds)}")
 
 prefix = """A conversation between User and Assistant. The user asks a question, and the Assistant solves it. The assistant first thinks about the reasoning process in the mind and then provides the user with the answer.
 User: {query} Show your work in <think> </think> tags. And return the final answer in <answer> </answer> tags.
-Assistant: Let me solve this step by step.
-"""
+Assistant: Let me solve this step by step."""
 
 # add prefix to query
-ds = ds.map(lambda x: {'query': prefix.format(query=x['query']), 'completion': x['completion']})
+ds = ds.map(lambda x: {'query': prefix.format(query=x['query']), 'completion': '\n'+x['completion']})
 
 # delete all columns except query and completion
 ds = ds.remove_columns([col for col in ds.column_names if col not in ['query', 'completion']])
