@@ -56,6 +56,8 @@ target_len = 8300000
 cumsum = 0
 keep_idx = []
 for i, l in enumerate(lens):
+    # clip l at 4096
+    l = min(l, 4096)
     if cumsum + l <= target_len:
         cumsum += l
         keep_idx.append(i)
