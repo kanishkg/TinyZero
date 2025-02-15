@@ -101,7 +101,7 @@ DO not add new information, only use what is in the text. Don't add backtracking
 Now do it for this text:""",
 }
 
-    ds = datasets.load_dataset('Asap7772/open-web-math-backtrack-processed-v2', num_proc=os.cpu_count()-2, split=args.split)
+    ds = datasets.load_dataset('Asap7772/open-web-math-none-processed-v2', num_proc=os.cpu_count()-2, split=args.split)
         
     if args.max_examples > 0:
         ds = ds.select(range(args.max_examples))
@@ -159,7 +159,7 @@ Now do it for this text:""",
                 suffix = f'_{args.start}_{args.end}'
             else:
                 suffix = ''
-            ds_out_name = f'{args.user}open_web_math_qav2{suffix}'
+            ds_out_name = f'{args.user}open_web_math_qav2_none{suffix}'
             ds_so_far.push_to_hub(ds_out_name)
         except Exception as e:
             print(f'Error saving dataset: {e}')
@@ -171,7 +171,7 @@ Now do it for this text:""",
             suffix = f'_{args.start}_{args.end}'
         else:
             suffix = ''
-        ds_out_name = f'{args.user}open_web_math_qav2{suffix}'
+        ds_out_name = f'{args.user}open_web_math_qav2_none{suffix}'
         ds_so_far.push_to_hub(ds_out_name)
     except Exception as e:
         print(f'Final error saving dataset: {e}')
