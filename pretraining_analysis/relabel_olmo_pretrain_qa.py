@@ -96,6 +96,8 @@ So, the thoughts should be in the first person, and should look like the author 
 Include the mistakes made by the author in the thoughts section. If the author makes a mistake, include the mistake in the thoughts section.
 Use present tense in the thoughts section. The thoughts section should look like the author is thinking out loud.
 This will come with the realization from the author that they made a mistake.
+DO not add new information, only use what is in the text. Don't add backtracking, verification, or subgoal setting if it is not in the text.
+
 Now do it for this text:""",
 }
 
