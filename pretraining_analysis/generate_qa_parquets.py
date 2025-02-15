@@ -1,14 +1,24 @@
 import datasets
+from transformers import AutoTokenizer
 
 
 
+# data_names = [
+#     'obiwan96/obiwan96open_web_math_qav2_0_11616', 
+#     'obiwan96/obiwan96open_web_math_qav2_11616_23232',
+#     'obiwan96/obiwan96open_web_math_qav2_23232_34848',
+#     'obiwan96/obiwan96open_web_math_qav2_34848_46467',
+# ]
 data_names = [
-    'obiwan96/obiwan96open_web_math_qav2_0_11616', 
-    'obiwan96/obiwan96open_web_math_qav2_11616_23232',
-    'obiwan96/obiwan96open_web_math_qav2_23232_34848',
-    'obiwan96/obiwan96open_web_math_qav2_34848_46467',
+    'obiwan96/obiwan96open_web_math_qav2_none_0_12500',
+    'obiwan96/obiwan96open_web_math_qav2_none_12500_25000',
+    'obiwan96/obiwan96open_web_math_qav2_none_25000_37500',
+    'obiwan96/obiwan96open_web_math_qav2_none_37500_50000',
+    'obiwan96/obiwan96open_web_math_qav2_none_50000_55000',
+    'obiwan96/obiwan96open_web_math_qav2_none_55000_60000',
+    'obiwan96/obiwan96open_web_math_qav2_none_60000_65000',
+    'obiwan96/obiwan96open_web_math_qav2_none_65000_70000',
 ]
-
 all_ds = []
 for data_name in data_names:
     ds = datasets.load_dataset(data_name)
@@ -38,7 +48,24 @@ ds = ds.remove_columns([col for col in ds.column_names if col not in ['query', '
 # create train and validation splits
 ds = ds.train_test_split(test_size=0.05)
 
-ds_out_name = 'obiwan96/obiwan96open_web_math_qav2_bactrack'
+train_completion = ds['train']['completion']
+tokenizer = AutoTokenizer.from_pretrained('meta-llama/Llama-3.1-8B')
+tokens = tokenizer(train_completion)
+lens = [len(t) for t in tokens['input_ids']]
+target_len = 8300000
+cumsum = 0
+keep_idx = []
+for i, l in enumerate(lens):
+    if cumsum + l <= target_len:
+        cumsum += l
+        keep_idx.append(i)
+    else:
+        break
+
+ds['train'] = ds['train'].select(keep_idx)
+print(f"Kept {len(keep_idx)} examples with total {cumsum} tokens")
+
+ds_out_name = 'obiwan96/obiwan96open_web_math_qav2_none'
 ds.push_to_hub(ds_out_name)
 
 # save as train.parquet and test.parquet
