@@ -98,7 +98,8 @@ Use present tense in the thoughts section. The thoughts section should look like
 This will come with the realization from the author that they made a mistake.
 
 DO not add new information, only use what is in the text. Don't add backtracking, verification, or subgoal setting if it is not in the text.
-First check if the text has backtracking, verification, subgoals in <checking>...</checking> tags.
+First check if the text has backtracking, verification, subgoals in <checking>...</checking> tags. Be very concise when checking.
+You can only use 100 words to check, then you can write the thoughts section and the answer.
 If it does, then use the information in the tags to write the thoughts section. Otherwise, write the thoughts in a deductive way, no need to add backtracking, verification, or subgoal setting.
 
 Now do it for this text:""",
