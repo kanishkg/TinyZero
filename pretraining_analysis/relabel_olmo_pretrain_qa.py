@@ -145,6 +145,7 @@ Now do it for this text:""",
         responses = llm.generate(prompts, sampling_params=sampling_params)
 
         outputs_dict = {
+            'raw_qa': [None] * len(curr_batch),
             'query': [None] * len(curr_batch),
             'completion': [None] * len(curr_batch)
         }
@@ -152,9 +153,11 @@ Now do it for this text:""",
         for i, response in enumerate(responses):
             output = response.outputs[0].text.strip()
             query, completion = parse_output(output)
+            outputs_dict['raw_qa'][i] = output
             outputs_dict['query'][i] = query
             outputs_dict['completion'][i] = completion
         
+        curr_batch = curr_batch.add_column('raw_qa', outputs_dict['raw_qa'])
         curr_batch = curr_batch.add_column('query', outputs_dict['query'])
         curr_batch = curr_batch.add_column('completion', outputs_dict['completion'])
 
