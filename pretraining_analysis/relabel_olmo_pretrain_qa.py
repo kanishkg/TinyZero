@@ -116,6 +116,7 @@ Now do it for this text:""",
     
     # filter examples where 'contain_problem' is no or 'contain_solution' is no
     ds = ds.filter(lambda x: x['contain_problem'] == 'yes' and x['contain_solution'] == 'yes')
+    print(f"Number of examples after filtering: {len(ds)}")
 
     llm = LLM(
         model='Qwen/Qwen2.5-32B-Instruct',
