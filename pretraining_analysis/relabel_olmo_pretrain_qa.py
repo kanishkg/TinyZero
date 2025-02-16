@@ -112,6 +112,10 @@ Now do it for this text:""",
     if args.start >= 0 and args.end >= 0 and args.start < args.end:
         print('Subsampling the dataset with start={} and end={}'.format(args.start, args.end))
         ds = ds.select(range(args.start, args.end))
+    
+    # filter examples where 'contain_problem' is no or 'contain_solution' is no
+    ds = ds.filter(lambda x: x['contain_problem'] == 'yes' and x['contain_solution'] == 'yes')
+
     llm = LLM(
         model='Qwen/Qwen2.5-32B-Instruct',
         tokenizer_mode="auto",
