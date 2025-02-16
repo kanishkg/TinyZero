@@ -31,7 +31,7 @@ def get_prompts(ds, tokenizer, prompt_templates):
 
     for example in tqdm(samples, desc="Generating prompts"):
         prompt = prompt_templates['qa2'] + f"\n<text>\n{example}\n</text>"
-        prompt = [{'role': 'user', 'content': prompt}]
+        prompt = [{'role': 'user', 'content': prompt}, {'role': 'assistant', 'content': ''}]
         prompts += [prompt]
   
     new_prompts = [tokenizer.apply_chat_template(
