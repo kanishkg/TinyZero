@@ -30,7 +30,7 @@ def get_prompts(ds, tokenizer, prompt_templates):
             samples += [ds['text'][e]]
 
     for example in tqdm(samples, desc="Generating prompts"):
-        prompt = prompt_templates['qa2'] + f"\n<text>\n{example}\n</text>"
+        prompt = prompt_templates['qa_none'] + f"\n<text>\n{example}\n</text>"
         prompt = [{'role': 'user', 'content': prompt}, {'role': 'assistant', 'content': ''}]
         prompts += [prompt]
   
@@ -97,12 +97,18 @@ Include the mistakes made by the author in the thoughts section. If the author m
 Use present tense in the thoughts section. The thoughts section should look like the author is thinking out loud.
 This will come with the realization from the author that they made a mistake.
 
-DO not add new information, only use what is in the text. Don't add backtracking, verification, or subgoal setting if it is not in the text.
-First check if the text has backtracking, verification, subgoals in <checking>...</checking> tags. Be very concise when checking.
-If it does, then use the information in the tags to write the thoughts section. Otherwise, write the thoughts in a deductive way, no need to add backtracking, verification, or subgoal setting.
-You can only use 100 words to check, then you can write the thoughts section and the answer.
-
 Now do it for this text:""",
+
+    'qa_none': """Your goal is to split the text into a question, thought and an answer.
+Make sure that the question is in the text. 
+Make sure that the answer and the process of the writer to get to the answer are in the text.
+Paraphrase the answer so that the answer is cleaned up. Make sure that the answer has the process of finding the solution.    
+Write the question in <question>...</question>.
+For the answer, split the answer into the process towards reaching the answer and the final answer.
+Write the process in <thoughts></thoughts> and the final answer in <answer>...</answer>.
+Use first person pronouns like "I" and "me" to refer to the author.
+
+Now do it for this text:"""
 }
 
     ds = datasets.load_dataset('Asap7772/open-web-math-none-processed-v2', num_proc=os.cpu_count()-2, split=args.split)
