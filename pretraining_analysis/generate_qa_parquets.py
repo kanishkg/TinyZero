@@ -10,18 +10,10 @@ from transformers import AutoTokenizer
 #     'obiwan96/obiwan96open_web_math_qav2_34848_46467',
 # ]
 data_names = [
-    'obiwan96/obiwan96open_web_math_qav2_none_0_12500',
-    'obiwan96/obiwan96open_web_math_qav2_none_12500_25000',
-    'obiwan96/obiwan96open_web_math_qav2_none_25000_37500',
-    'obiwan96/obiwan96open_web_math_qav2_none_37500_50000',
-    'obiwan96/obiwan96open_web_math_qav2_none_50000_55000',
-    'obiwan96/obiwan96open_web_math_qav2_none_55000_60000',
-    'obiwan96/obiwan96open_web_math_qav2_none_60000_65000',
-    'obiwan96/obiwan96open_web_math_qav2_none_65000_70000',
-    'obiwan96/obiwan96open_web_math_qav2_none_70000_95000',
-    'obiwan96/obiwan96open_web_math_qav2_none_95000_120000',
-    'obiwan96/obiwan96open_web_math_qav2_none_120000_145000',
-    'obiwan96/obiwan96open_web_math_qav2_none_145000_170000',
+    'obiwan96/obiwan96open_web_math_qav2_none_0_40000',
+    'obiwan96/obiwan96open_web_math_qav2_none_40000_80000',
+    'obiwan96/obiwan96open_web_math_qav2_none_80000_120000',
+    'obiwan96/obiwan96open_web_math_qav2_none_120000_160000',
 ]
 all_ds = []
 for data_name in data_names:
