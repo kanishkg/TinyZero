@@ -14,8 +14,8 @@ data_names = [
     'obiwan96/obiwan96open_web_math_qav2_none_40000_80000',
     'obiwan96/obiwan96open_web_math_qav2_none_80000_120000',
     'obiwan96/obiwan96open_web_math_qav2_none_120000_160000',
-    'obiwan96/obiwan96open_web_math_qav2_none_160000_240000',
-    'obiwan96/obiwan96open_web_math_qav2_none_240000_320000',
+    # 'obiwan96/obiwan96open_web_math_qav2_none_160000_240000',
+    # 'obiwan96/obiwan96open_web_math_qav2_none_240000_320000',
     'obiwan96/obiwan96open_web_math_qav2_none_320000_400000',
     'obiwan96/obiwan96open_web_math_qav2_none_400000_449461',
 ]
