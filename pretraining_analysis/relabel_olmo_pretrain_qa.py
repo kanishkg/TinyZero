@@ -115,7 +115,7 @@ Now do it for this text:""",
         ds = ds.select(range(args.start, args.end))
     
     # filter examples where 'contain_problem' is no or 'contain_solution' is no
-    ds = ds.filter(lambda x: x['contain_problem'] == 'yes' and x['contain_solution'] == 'yes')
+    ds = ds.filter(lambda x: x['contain_problem'] != 'no' and x['contain_solution'] != 'no')
     print(f"Number of examples after filtering: {len(ds)}")
 
     llm = LLM(
