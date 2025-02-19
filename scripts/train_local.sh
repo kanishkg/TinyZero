@@ -14,7 +14,7 @@ export HF_TOKEN='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'
 models=(
     meta-llama/Llama-3.2-3B
     /home/anikait.singh/rl_behaviors/sft/owmathqa_method/global_step_1344
-    /home/anikait.singh/rl_behaviors/sft/owmathqa_none/
+    /home/anikait.singh/rl_behaviors/sft/owmathqa_none
     Qwen/Qwen2.5-3B
 )
 num_models=${#models[@]}
@@ -26,7 +26,12 @@ names=(
 )
 num_names=${#names[@]}
 # data_dir="/home/anikait.singh/rl_behaviors/data_countdown"
-data_dir = '/home/anikait.singh/rl_behaviors/data_math'
+data_dir='/home/anikait.singh/rl_behaviors/data_math'
+
+if [ ! -d $data_dir ]; then
+    echo "Data directory does not exist"
+    exit 1
+fi
 
 gpus=(
     "0,1,2,3,4,5,6,7"
