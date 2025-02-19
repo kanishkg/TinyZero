@@ -72,8 +72,8 @@ for i in $(seq 0 $((num_models-1))); do
     export VLLM_ATTENTION_BACKEND=XFORMERS
     export CUDA_VISIBLE_DEVICES=${gpus[$i]}
 
-    command="bash ./scripts/train_tiny_zero_n4.sh"
-    # command="bash ./scripts/train_math.sh"
+    # command="bash ./scripts/train_tiny_zero_n4.sh"
+    command="bash ./scripts/train_math.sh"
     echo "Using GPU: $CUDA_VISIBLE_DEVICES"
     echo $command
     if [ $dry_run = true ]; then
