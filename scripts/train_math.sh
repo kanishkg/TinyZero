@@ -32,11 +32,15 @@ python3 -m verl.trainer.main_ppo \
    algorithm.kl_ctrl.kl_coef=0.001 \
    trainer.critic_warmup=0 \
    trainer.logger=['console','wandb'] \
+   +trainer.val_before_train=True \
+   trainer.default_hdfs_dir=null \
+   trainer.n_gpus_per_node=$N_GPUS \
+   trainer.nnodes=1 \
+   trainer.save_freq=100 \
+   trainer.test_freq=100 \
    trainer.project_name=behavior_amplification_math \
    trainer.experiment_name=$EXPERIMENT_NAME \
    trainer.save_freq=5 \
    trainer.test_freq=10 \
    trainer.default_local_dir=/home/anikait.singh/rl_behaviors/ppo/$EXPERIMENT_NAME \
-   trainer.n_gpus_per_node=8 \
-   trainer.nnodes=1 \
    trainer.total_epochs=15 $@
