@@ -12,36 +12,28 @@ export HF_DATASETS_CACHE=$hf_cache_dir
 export HF_TOKEN='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'
 
 models=(
-    /home/anikait.singh/rl_behaviors/sft/OLMo-7B-hf/backtrack/global_step_500
-    /home/anikait.singh/rl_behaviors/sft/OLMo-7B-hf/baseline/global_step_500
-    /home/anikait.singh/rl_behaviors/sft/OLMo-7B-hf/negative/global_step_500
-    /home/anikait.singh/rl_behaviors/sft/OLMo-7B-hf/method/global_step_500
-
-    /home/anikait.singh/rl_behaviors/sft/Llama-3.2-3B/backtrack/global_step_500
-    /home/anikait.singh/rl_behaviors/sft/Llama-3.2-3B/baseline/global_step_500
-    /home/anikait.singh/rl_behaviors/sft/Llama-3.2-3B/negative/global_step_500
-    /home/anikait.singh/rl_behaviors/sft/Llama-3.2-3B/method/global_step_500
+    meta-llama/Llama-3.2-3B
+    /home/anikait.singh/rl_behaviors/sft/owmathqa_method/global_step_1344
+    /home/anikait.singh/rl_behaviors/sft/owmathqa_none
+    Qwen/Qwen2.5-3B
 )
 num_models=${#models[@]}
 names=(
-    countdown-olmo7b-pretdata-backtrack
-    countdown-olmo7b-pretdata-baseline
-    countdown-olmo7b-pretdata-negative
-    countdown-olmo7b-pretdata-method
-
-    countdown-llama3b-pretdata-backtrack
-    countdown-llama3b-pretdata-baseline
-    countdown-llama3b-pretdata-negative
-    countdown-llama3b-pretdata-method
+    math-llama3b-base
+    math-llama3b-method
+    math-llama3b-none
+    math-qwen3b-base
 )
 num_names=${#names[@]}
-data_dir="/home/anikait.singh/rl_behaviors/data_countdown"
+# data_dir="/home/anikait.singh/rl_behaviors/data_countdown"
+data_dir='/home/anikait.singh/rl_behaviors/data_math'
+
+if [ ! -d $data_dir ]; then
+    echo "Data directory does not exist"
+    exit 1
+fi
 
 gpus=(
-    "0,1,2,3,4,5,6,7"
-    "0,1,2,3,4,5,6,7"
-    "0,1,2,3,4,5,6,7"
-    "0,1,2,3,4,5,6,7"
     "0,1,2,3,4,5,6,7"
     "0,1,2,3,4,5,6,7"
     "0,1,2,3,4,5,6,7"
@@ -80,7 +72,8 @@ for i in $(seq 0 $((num_models-1))); do
     export VLLM_ATTENTION_BACKEND=XFORMERS
     export CUDA_VISIBLE_DEVICES=${gpus[$i]}
 
-    command="bash ./scripts/train_tiny_zero_n4.sh"
+    # command="bash ./scripts/train_tiny_zero_n4.sh"
+    command="bash ./scripts/train_math.sh"
     echo "Using GPU: $CUDA_VISIBLE_DEVICES"
     echo $command
     if [ $dry_run = true ]; then

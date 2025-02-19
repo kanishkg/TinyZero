@@ -38,6 +38,8 @@ pip install wandb IPython matplotlib
 ```
 conda activate zero
 python ./examples/data_preprocess/countdown.py --local_dir {path_to_your_dataset}
+python ./examples/data_preprocess/math_dataset.py --local_dir {path_to_your_dataset}
+pip install asynciolimiter loguru tenacity
 ```
 
 ### Run Training

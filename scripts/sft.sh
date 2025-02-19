@@ -13,15 +13,21 @@ export HF_TOKEN='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'
 
 # List of dataset conditions
 conditions=(
-  backtrack
-  baseline
   method
-  negative
 )
 
 model_names=(
-  allenai/OLMo-7B-hf
   meta-llama/Llama-3.2-3B
+)
+
+epochs=(
+  2
+  5
+)
+
+lrs=(
+  1e-6
+  1e-7
 )
 
 # Base path for dataset files
@@ -50,6 +56,8 @@ fi
 # Iterate over each condition and launch a training job
 for model_name in "${model_names[@]}"; do
 for condition in "${conditions[@]}"; do
+for total_epochs in "${epochs[@]}"; do
+for lr in "${lrs[@]}"; do
   if [ $which_exp -ne -1 ] && [ $exp_num -ne $which_exp ]; then
       exp_num=$((exp_num+1))
       continue
@@ -59,8 +67,9 @@ for condition in "${conditions[@]}"; do
   val_file="${base_data_path}/${condition}/test.parquet"
 
   model_name_short=$(echo $model_name | cut -d'/' -f2)
-  experiment_name="countdown-pretraineddata-sft-${model_name_short}-${condition}"
-  save_dir="${default_local_dir}/${model_name_short}/${condition}"
+  experiment_name="countdown-pretraineddata-sft-${model_name_short}-${condition}-epochs${total_epochs}-lr${lr}-exp${exp_num}"
+  # save_dir="${default_local_dir}/${model_name_short}/${condition}/${total_epochs}/${lr}/${exp_num}"
+  save_dir="${default_local_dir}/${experiment_name}"
   mkdir -p $save_dir
 
   echo "Running training for condition: ${condition}"
@@ -89,5 +98,7 @@ for condition in "${conditions[@]}"; do
   echo "--------------------------------------------------"
 
   exp_num=$((exp_num+1))
+done
+done
 done
 done

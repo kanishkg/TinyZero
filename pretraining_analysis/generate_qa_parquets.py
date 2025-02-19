@@ -10,10 +10,10 @@ from transformers import AutoTokenizer
 #     'obiwan96/obiwan96open_web_math_qav2_34848_46467',
 # ]
 data_names = [
-    'obiwan96/obiwan96open_web_math_qav2_none_0_40000',
-    'obiwan96/obiwan96open_web_math_qav2_none_40000_80000',
-    'obiwan96/obiwan96open_web_math_qav2_none_80000_120000',
-    'obiwan96/obiwan96open_web_math_qav2_none_120000_160000',
+    'obiwan96/obiwan96open_web_math_qav2_none_0_100000',
+    'obiwan96/obiwan96open_web_math_qav2_none_100000_200000',
+    'obiwan96/obiwan96open_web_math_qav2_none_200000_300000',
+    'obiwan96/obiwan96open_web_math_qav2_none_300000_400000',
 ]
 all_ds = []
 for data_name in data_names:
