@@ -227,7 +227,9 @@ def tokenize_and_postprocess_data(prompt: str,
                                   max_length: int,
                                   pad_token_id: int,
                                   left_pad=True,
-                                  truncation='error'):
+                                  truncation='right'):
+    # TODO: fix the hack
+    truncation='right'
     """
     input_data is the output from tokenizer.
     """

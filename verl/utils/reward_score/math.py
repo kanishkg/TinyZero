@@ -22,16 +22,23 @@ def compute_score(solution_str, ground_truth) -> float:
         string_in_last_boxed = last_boxed_only_string(solution_str)
         if string_in_last_boxed is not None:
             answer = remove_boxed(string_in_last_boxed)
-            try:
-                if is_equiv_synth(answer, ground_truth):
-                    retval = 1.
-            except Exception as e:
-                if is_equiv(answer, ground_truth):
-                    retval = 1.
+            if is_equiv_any(ground_truth, answer):
+                retval = 1.
+            elif answer is not None and answer != "":
+                retval = 0.1 # format_score
     except Exception as e:
         print(e)
 
     return retval
+
+def is_equiv_any(gold, answer) -> bool:
+    try:
+        if is_equiv_synth(gold, answer):
+            return True
+    except Exception as e:
+        if is_equiv(gold, answer):
+            return True
+    return False
 
 # TODO: Figure out why math_verify can't be installed
 def is_equiv_mathverify(gold, answer) -> bool:
