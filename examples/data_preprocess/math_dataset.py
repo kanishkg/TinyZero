@@ -27,22 +27,41 @@ from verl.utils.reward_score.math import remove_boxed, last_boxed_only_string
 def extract_solution(solution_str):
     return remove_boxed(last_boxed_only_string(solution_str))
 
+def make_prefix(question, template_type):
+    # NOTE: also need to change reward_score/countdown.py
+    if template_type == 'base':
+        """This works for any base model"""
+        prefix = f"""A conversation between User and Assistant. The user asks a question, and the Assistant solves it. The assistant first thinks about the reasoning process in the mind and then provides the user with the answer.
+User: {question}
+Assistant: Let me solve this step by step.
+<think>"""
+    elif template_type == 'base-2':
+        prefix = f"""{question}
+Show your work in <think> </think> tags. And return the final answer in <answer> </answer> tags. For example, <answer> (1 + 2) / 3 </answer>.
+Let me see if I can solve this step by step.
+<think>"""
+    elif template_type == 'qwen-instruct':
+        """This works for Qwen Instruct Models"""
+        prefix = f"""<|im_start|>system\nYou are a helpful assistant. You first thinks about the reasoning process in the mind and then provides the user with the answer.<|im_end|>\n<|im_start|>user\n {question} Show your work in <think> </think> tags. And return the final answer in <answer> </answer> tags, for example <answer> (1 + 2) / 3 </answer>.<|im_end|>\n<|im_start|>assistant\nLet me solve this step by step.\n<think>"""
+    return prefix
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--local_dir', default='~/data/math')
     parser.add_argument('--hdfs_dir', default=None)
+    parser.add_argument('--template_type', type=str, default='base')
 
     args = parser.parse_args()
 
-    data_source = 'lighteval/MATH'
+    data_source = 'RLAIF/math'
 
     dataset = datasets.load_dataset(data_source, trust_remote_code=True)
 
     train_dataset = dataset['train']
     test_dataset = dataset['test']
 
-    instruction_following = "Let's think step by step and output the final answer within \\boxed{}."
+    # instruction_following = "Let's think step by step and output the final answer within \\boxed{}."
 
     # add a row to each data item that represents a unique id
     def make_map_fn(split):
@@ -50,7 +69,8 @@ if __name__ == '__main__':
         def process_fn(example, idx):
             question = example.pop('problem')
 
-            question = question + ' ' + instruction_following
+            # question = question + ' ' + instruction_following
+            question = make_prefix(question, template_type=args.template_type)
 
             answer = example.pop('solution')
             solution = extract_solution(answer)

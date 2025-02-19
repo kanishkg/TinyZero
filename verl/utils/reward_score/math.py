@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # Adapted from https://github.com/EleutherAI/lm-evaluation-harness/blob/main/lm_eval/tasks/hendrycks_math/utils.py
-
+import sys
+import mpmath
+sys.modules['sympy.mpmath'] = mpmath
 
 def compute_score(solution_str, ground_truth) -> float:
     retval = 0.
@@ -20,13 +22,30 @@ def compute_score(solution_str, ground_truth) -> float:
         string_in_last_boxed = last_boxed_only_string(solution_str)
         if string_in_last_boxed is not None:
             answer = remove_boxed(string_in_last_boxed)
-            if is_equiv(answer, ground_truth):
-                retval = 1.
+            try:
+                if is_equiv_synth(answer, ground_truth):
+                    retval = 1.
+            except Exception as e:
+                if is_equiv(answer, ground_truth):
+                    retval = 1.
     except Exception as e:
         print(e)
 
     return retval
 
+# TODO: Figure out why math_verify can't be installed
+def is_equiv_mathverify(gold, answer) -> bool:
+    from math_verify import parse, verify
+    try:
+        gold_parsed = parse(gold)
+        answer_parsed = parse(answer)
+        return verify(gold_parsed, answer_parsed)
+    except Exception as e:
+        return False
+    
+def is_equiv_synth(gold, answer) -> bool:
+    from math_eval import MathEvaluator
+    return MathEvaluator.is_correct_sync(gold, answer)
 
 # string normalization from https://github.com/EleutherAI/lm-evaluation-harness/blob/master/lm_eval/tasks/hendrycks_math.py
 def is_equiv(str1, str2, verbose=False):

@@ -24,7 +24,7 @@ from verl.trainer.ppo.ray_trainer import RayPPOTrainer
 def _select_rm_score_fn(data_source):
     if data_source == 'openai/gsm8k':
         return gsm8k.compute_score
-    elif data_source == 'lighteval/MATH':
+    elif data_source == 'lighteval/MATH' or data_source == 'RLAIF/math' or 'math' in data_source:
         return math.compute_score
     elif "multiply" in data_source or "arithmetic" in data_source:
         return multiply.compute_score
