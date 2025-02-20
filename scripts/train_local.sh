@@ -19,10 +19,10 @@ models=(
 )
 num_models=${#models[@]}
 names=(
-    math-llama3b-base
-    math-llama3b-method
-    math-llama3b-none
-    math-qwen3b-base
+    math-llama3b-base-n4-answertag
+    math-llama3b-method-n4-answertag
+    math-llama3b-none-n4-answertag
+    math-qwen3b-base-n4-answertag
 )
 num_names=${#names[@]}
 # data_dir="/home/anikait.singh/rl_behaviors/data_countdown"

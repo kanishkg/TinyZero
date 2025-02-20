@@ -13,15 +13,74 @@
 # limitations under the License.
 # Adapted from https://github.com/EleutherAI/lm-evaluation-harness/blob/main/lm_eval/tasks/hendrycks_math/utils.py
 import sys
+import re
 import mpmath
 sys.modules['sympy.mpmath'] = mpmath
+import random
+from verl.utils.reward_score.math_eval import MathEvaluator
 
-def compute_score(solution_str, ground_truth) -> float:
+def extract_solution(solution_str):
+    """Extract the equation from the solution string."""
+    # Remove everything before the first "Assistant:"
+    if "Assistant:" in solution_str:
+        solution_str = solution_str.split("Assistant:", 1)[1]
+    elif "<|im_start|>assistant" in solution_str:
+        solution_str = solution_str.split("<|im_start|>assistant", 1)[1]
+    else:
+        return None
+    solution_str = solution_str.split('\n')[-1]
+
+    answer_pattern = r'<answer>(.*?)</answer>'
+    match = re.finditer(answer_pattern, solution_str)
+    matches = list(match)
+    if matches:
+        final_answer = matches[-1].group(1).strip()
+    else:
+        final_answer = None
+    return final_answer
+
+def compute_score(solution_str, ground_truth, answer_type='answer_tag') -> float:
+    if answer_type == 'answer_tag':
+        return compute_score_answer_tag(solution_str, ground_truth)
+    elif answer_type == 'boxed':
+        return compute_score_boxed(solution_str, ground_truth)
+    else:
+        raise ValueError(f"Unknown answer type {answer_type}")
+
+def compute_score_answer_tag(solution_str, ground_truth) -> float:
+    retval = 0.
+    
+    equation = extract_solution(solution_str=solution_str)
+    do_print = random.randint(1, 64) == 1
+    
+    if do_print:
+        print(f"--------------------------------")
+        print(f"Extracted equation: {equation}")
+        print(f"Solution string: {solution_str}")
+    
+    # Just in case there is a boxed answer in the solution
+    equation = MathEvaluator.remove_boxed(equation)
+    
+    if equation is None or equation.strip() == "":
+        if do_print:
+            print(f"Equation is empty")
+        return 0.
+    
+    # now evaluate the equation
+    retval = 0.1 # format_score
+    try:
+        if is_equiv_any(ground_truth, equation):
+            retval = 1.
+    except Exception as e:
+        print(e)
+        
+    return retval
+
+def compute_score_boxed(solution_str, ground_truth) -> float:
     retval = 0.
     try:
-        string_in_last_boxed = last_boxed_only_string(solution_str)
-        if string_in_last_boxed is not None:
-            answer = remove_boxed(string_in_last_boxed)
+        answer = MathEvaluator.get_answer_expr(solution_str)
+        if answer is not None:
             if is_equiv_any(ground_truth, answer):
                 retval = 1.
             elif answer is not None and answer != "":
@@ -51,7 +110,6 @@ def is_equiv_mathverify(gold, answer) -> bool:
         return False
     
 def is_equiv_synth(gold, answer) -> bool:
-    from math_eval import MathEvaluator
     return MathEvaluator.is_correct_sync(gold, answer)
 
 # string normalization from https://github.com/EleutherAI/lm-evaluation-harness/blob/master/lm_eval/tasks/hendrycks_math.py

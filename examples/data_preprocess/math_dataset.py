@@ -21,19 +21,21 @@ import datasets
 from verl.utils.hdfs_io import copy, makedirs
 import argparse
 
-from verl.utils.reward_score.math import remove_boxed, last_boxed_only_string
+# from verl.utils.reward_score.math import remove_boxed, last_boxed_only_string
+from verl.utils.reward_score.math_eval import MathEvaluator
 
 
 def extract_solution(solution_str):
-    return remove_boxed(last_boxed_only_string(solution_str))
+    # return remove_boxed(last_boxed_only_string(solution_str))
+    return MathEvaluator.get_answer_expr(solution_str)
 
 def make_prefix(question, template_type):
     # NOTE: also need to change reward_score/countdown.py
     if template_type == 'base':
         """This works for any base model"""
-        prefix = f"""A conversation between User and Assistant. The user asks a question, and the Assistant solves it. The assistant first thinks about the reasoning process in the mind and then provides the user with the answer. The assistant outputs the final answer within \\boxed{{}} tags.
-User: {question}
-Assistant: Let me solve this step by step.
+        prefix = f"""A conversation between User and Assistant. The user asks a question, and the Assistant solves it. The assistant first thinks about the reasoning process in the mind and then provides the user with the answer.
+User: {question} Show your work in <think> </think> tags. And return the final answer in <answer> </answer> tags, for example <answer> 5 </answer>.
+Assistant: Let me solve this step by step. 
 <think>"""
     elif template_type == 'base-2':
         prefix = f"""{question}
