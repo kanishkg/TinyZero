@@ -134,7 +134,7 @@ Now do it for this text:""",
 
 }
 
-    ds = datasets.load_dataset('Asap7772/open-web-math-none-processed-v2', num_proc=os.cpu_count()-2, split=args.split)
+    ds = datasets.load_dataset('Asap7772/open-web-math-processed-v2', num_proc=os.cpu_count()-2, split=args.split)
         
     if args.max_examples > 0:
         ds = ds.select(range(args.max_examples))
