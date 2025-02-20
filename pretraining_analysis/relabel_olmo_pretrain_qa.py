@@ -30,7 +30,7 @@ def get_prompts(ds, tokenizer, prompt_templates):
             samples += [ds['text'][e]]
 
     for example in tqdm(samples, desc="Generating prompts"):
-        prompt = prompt_templates['qa_none_2'] + f"\n<text>\n{example}\n</text>"
+        prompt = prompt_templates['qa3'] + f"\n<text>\n{example}\n</text>"
         prompt = [{'role': 'user', 'content': prompt}, {'role': 'assistant', 'content': ''}]
         prompts += [prompt]
   
@@ -98,6 +98,27 @@ Use present tense in the thoughts section. The thoughts section should look like
 This will come with the realization from the author that they made a mistake.
 
 Now do it for this text:""",
+    'qa3': """Your goal is to split the text into a question, thought and an answer.
+
+The thought is the process of the author to get to the answer.
+The answer is the final answer.
+Make sure that the thoughts have backtracking, verification, and subgoal setting.
+
+Here are the definitions of the words:
+Backtracking: The process of finding the solution by going back and forth between the answer and the question.
+Verification: The process of checking the answer to see if it is correct.
+Subgoal setting: The process of setting smaller goals to reach the final answer.
+
+Write the question in <question>...</question>.
+For the answer, split the answer into the process towards reaching the answer and the final answer.
+Write the process in <thoughts> thinking process of the author with backtracking etc. goes here.</thoughts> and the final answer in <answer>...</answer>.
+Use first person pronouns like "I" and "me" to refer to the author.
+So, the thoughts should be in the first person, and should look like the author is thinking out loud. Eg: "I think I should try this next."
+Include the mistakes made by the author in the thoughts section. If the author makes a mistake, include the mistake in the thoughts section.
+Use present tense in the thoughts section. The thoughts section should look like the author is thinking out loud.
+This will come with the realization from the author that they made a mistake.
+
+Now do it for this text:""",
 
     'qa_none': """Your goal is to split the text into a question, thought and an answer.
 Make sure that the question is in the text. 
@@ -110,28 +131,6 @@ Use first person pronouns like "I" and "me" to refer to the author.
 
 Now do it for this text:""",
 
-    'qa_none_2': """Your goal is to split the text into a question, thought and an answer.
-Make sure that the question is in the text. 
-Make sure that the answer and the process of the writer to get to the answer are in the text. Do not change the wording of either.
-Your goal is to copy and paste the question, the process and the answer into the correct sections.
-
-Write the question in <question>...</question>.
-For the answer, split the answer into the process towards reaching the answer and the final answer.
-Write the process in <thoughts>thinking process of the writer</thoughts> and the final answer in <answer>...</answer>.
-
-Directly copy, do not change the text.
-
-Here is an example:
-
-<text>
-# Parallel plate capacitor: Proton vs Electron 1. Feb 28, 2017 ### Kmol6 1. The problem statement, all variables and given/known data A proton is released from rest at the positive plate of a parallel-plate capacitor. It crosses the capacitor and reaches the negative plate with a speed of 51000 m/s . What will be the final speed of an electron released from rest at the negative plate? 2. Relevant equations 3. The attempt at a solution I'm struggling as to what equations to use, I've tried using KE, assuming that the KE in the system is the same for both the Proton and the Electron, but that didn't work. I've also tried to find the magnitude of the electric field and work back to a kinematic equation, I'm so stuck . I could really just use some guidance as to where to start. Last edited by a moderator: Feb 28, 2017 2. Feb 28, 2017 ### Staff: Mentor Hi Kmol6, Since you don't know anything about the dimensions of the capacitor you're not likely to have much luck finding the electric field. When you say that you tried using KE, what does that mean exactly? What equations did you use (Hence the importance of the Relevant equations section of the formatting template)? Can you show your attempt? 3. Feb 28, 2017 ### Kmol6 KEi + PEi = KEf+PEf 1/2mv^2 +mgh= 1/2mv^2 + mgh 1/2(9.11x10^-31kg)(51000)^2 + 0 = 1/2 (1.67X10^-27)(V)^2 +0 Vf=1284 m/s 4. Feb 28, 2017 ### Staff: Mentor You've swapped the roles of the proton and electron. It was the proton that went first and ended up with a speed of 51000 m/s. Since it's not the conditions of the same particle that you are comparing, the conservation of energy law is not where you should start. What you're looking for is the formula that gives the work done on a charge falling through a given potential difference, hence the energy imparted. You can then claim that since the charges on the electron and proton are identical, they must both gain the same amount of kinetic energy. Then you can equate the KE's of each. 5. Feb 28, 2017 ### Kmol6 1/2mv^2=qDeltaV? Then sub the answer for delta V into DeltaU=qDeltaV using q as 1.602X10^-19C and then plug Delta U into 1/2mv^2=DeltaU and solve for v^2 of the electron? (I think systematically, combining equations isn't easy for me) I got 2.2X10^6m/s ? 6. Feb 28, 2017 ### Staff: Mentor That's the idea. Your result looks good. Note that since qΔV is the same for both particles you can write: $\frac{1}{2} m_ev_e^2 = q ΔV = \frac{1}{2} m_pv_p^2$ $m_ev_e^2 = m_pv_p^2$ $v_e = \sqrt{\frac{m_p}{m_e}}v_p$ 7. Feb 28, 2017 ### Kmol6 Thank you!!!!!
-</text>
-And this is how you should split it:
-<question>The problem statement, all variables and given/known data A proton is released from rest at the positive plate of a parallel-plate capacitor. It crosses the capacitor and reaches the negative plate with a speed of 51000 m/s . What will be the final speed of an electron released from rest at the negative plate?</question>
-<thoughts>I'm struggling as to what equations to use, I've tried using KE, assuming that the KE in the system is the same for both the Proton and the Electron, but that didn't work. I've also tried to find the magnitude of the electric field and work back to a kinematic equation, I'm so stuck . I could really just use some guidance as to where to start. Last edited by a moderator: Feb 28, 2017 2. Feb 28, 2017 ### Staff: Mentor Hi Kmol6, Since you don't know anything about the dimensions of the capacitor you're not likely to have much luck finding the electric field. When you say that you tried using KE, what does that mean exactly? What equations did you use (Hence the importance of the Relevant equations section of the formatting template)? Can you show your attempt? 3. Feb 28, 2017 ### Kmol6 KEi + PEi = KEf+PEf 1/2mv^2 +mgh= 1/2mv^2 + mgh 1/2(9.11x10^-31kg)(51000)^2 + 0 = 1/2 (1.67X10^-27)(V)^2 +0 Vf=1284 m/s 4. Feb 28, 2017 ### Staff: Mentor You've swapped the roles of the proton and electron. It was the proton that went first and ended up with a speed of 51000 m/s. Since it's not the conditions of the same particle that you are comparing, the conservation of energy law is not where you should start. What you're looking for is the formula that gives the work done on a charge falling through a given potential difference, hence the energy imparted. You can then claim that since the charges on the electron and proton are identical, they must both gain the same amount of kinetic energy. Then you can equate the KE's of each. 5. Feb 28, 2017 ### Kmol6 1/2mv^2=qDeltaV? Then sub the answer for delta V into DeltaU=qDeltaV using q as 1.602X10^-19C and then plug Delta U into 1/2mv^2=DeltaU and solve for v^2 of the electron? (I think systematically, combining equations isn't easy for me) I got 2.2X10^6m/s ? 6. Feb 28, 2017 ### Staff: Mentor That's the idea. Your result looks good. Note that since qΔV is the same for both particles you can write: $\frac{1}{2} m_ev_e^2 = q ΔV = \frac{1}{2} m_pv_p^2$ $m_ev_e^2 = m_pv_p^2$ $v_e = \sqrt{\frac{m_p}{m_e}}v_p$ 7. Feb 28, 2017 ### Kmol6 Thank you!!!!!</thoughts>
-<answer>2.2X10^6m/s</answer>
-
-Now do it for this text:"""
 }
 
     ds = datasets.load_dataset('Asap7772/open-web-math-none-processed-v2', num_proc=os.cpu_count()-2, split=args.split)
