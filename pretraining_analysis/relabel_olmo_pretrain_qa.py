@@ -200,7 +200,7 @@ Now do it for this text:""",
                 suffix = f'_{args.start}_{args.end}'
             else:
                 suffix = ''
-            ds_out_name = f'{args.user}open_web_math_qav2_none{suffix}'
+            ds_out_name = f'{args.user}open_web_math_qav3{suffix}'
             ds_so_far.push_to_hub(ds_out_name)
         except Exception as e:
             print(f'Error saving dataset: {e}')
@@ -212,7 +212,7 @@ Now do it for this text:""",
             suffix = f'_{args.start}_{args.end}'
         else:
             suffix = ''
-        ds_out_name = f'{args.user}open_web_math_qav2_none{suffix}'
+        ds_out_name = f'{args.user}open_web_math_qav3{suffix}'
         ds_so_far.push_to_hub(ds_out_name)
     except Exception as e:
         print(f'Final error saving dataset: {e}')
