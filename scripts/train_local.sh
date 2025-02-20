@@ -14,14 +14,12 @@ export HF_TOKEN='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'
 models=(
     meta-llama/Llama-3.2-3B
     /home/anikait.singh/rl_behaviors/sft/owmathqa_method/global_step_1344
-    /home/anikait.singh/rl_behaviors/sft/owmathqa_none
     Qwen/Qwen2.5-3B
 )
 num_models=${#models[@]}
 names=(
     math-llama3b-base-n4-answertag
     math-llama3b-method-n4-answertag
-    math-llama3b-none-n4-answertag
     math-qwen3b-base-n4-answertag
 )
 num_names=${#names[@]}
@@ -34,7 +32,6 @@ if [ ! -d $data_dir ]; then
 fi
 
 gpus=(
-    "0,1,2,3,4,5,6,7"
     "0,1,2,3,4,5,6,7"
     "0,1,2,3,4,5,6,7"
     "0,1,2,3,4,5,6,7"

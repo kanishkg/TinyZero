@@ -59,12 +59,21 @@ def compute_score_answer_tag(solution_str, ground_truth) -> float:
         print(f"Solution string: {solution_str}")
     
     # Just in case there is a boxed answer in the solution
-    equation = MathEvaluator.remove_boxed(equation)
-    
     if equation is None or equation.strip() == "":
         if do_print:
             print(f"Equation is empty")
         return 0.
+    
+    old_equation = equation
+    try:
+        equation = MathEvaluator.remove_boxed(equation)
+        
+        if equation is None or equation.strip() == "":
+            if do_print:
+                print(f"Equation is empty after removing boxed")
+            return 0.
+    except Exception as e:
+        equation = old_equation
     
     # now evaluate the equation
     retval = 0.1 # format_score

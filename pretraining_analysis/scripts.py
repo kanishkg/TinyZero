@@ -5,11 +5,11 @@ import subprocess
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--start', type=int, default=200000,
+    parser.add_argument('--start', type=int, default=400000,
                         help='Starting shard index (inclusive)')
-    parser.add_argument('--end', type=int, default=1000000,
+    parser.add_argument('--end', type=int, default=600000,
                         help='Ending shard index (exclusive)')
-    parser.add_argument('--num_nodes', type=int, default=6,
+    parser.add_argument('--num_nodes', type=int, default=2,
                         help='Total number of nodes to use')
     parser.add_argument('--node', type=int, default=0,
                         help='Index of the current node (0-indexed)')
@@ -68,7 +68,7 @@ def main():
         curr_gpu = gpus[i]
         env_prefix = f'CUDA_VISIBLE_DEVICES={curr_gpu} '
         command = (
-            f'python /home/anikait.singh/TinyZero/pretraining_analysis/relabel_olmo_pretrain_offline.py '
+            f'python /home/anikait.singh/TinyZero/pretraining_analysis/relabel_olmo_pretrain_qa.py '
             f'--start {proc_start} --end {proc_end} --user {args.user} --save_every {args.save_every}'
         )
         full_command = env_prefix + command
