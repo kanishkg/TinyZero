@@ -2,8 +2,7 @@ import os
 import numpy as np
 import datasets
 from transformers import AutoTokenizer
-
-
+from tqdm import tqdm
 
 # data_names = [
 #     'obiwan96/obiwan96open_web_math_qav2_0_11616', 
@@ -90,7 +89,7 @@ print(f"Total query tokens: {sum(query_lens)}")
 # trim max seq length (query + completion) to 4096
 new_dataset = []
 skipped = 0
-for i in range(len(ds)):
+for i in tqdm(range(len(ds))):
     if query_lens[i] + lens[i] > 4096:
         if query_lens[i] > 4096:
             skipped += 1
