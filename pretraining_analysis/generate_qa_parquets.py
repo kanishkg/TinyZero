@@ -1,3 +1,5 @@
+import os
+import numpy as np
 import datasets
 from transformers import AutoTokenizer
 
@@ -72,24 +74,29 @@ train_completion = ds['train']['completion']
 tokenizer = AutoTokenizer.from_pretrained('meta-llama/Llama-3.1-8B')
 tokens = tokenizer(train_completion)
 lens = [len(t) for t in tokens['input_ids']]
-target_len = 8300000
-cumsum = 0
-keep_idx = []
-for i, l in enumerate(lens):
-    # clip l at 4096
-    l = min(l, 4096)
-    if cumsum + l <= target_len:
-        cumsum += l
-        keep_idx.append(i)
-    else:
-        break
+print(f"Max length: {max(lens)}")
+print(f"Min length: {min(lens)}")
+print(f"Mean length: {np.mean(lens)}")
+# target_len = 8300000
+# cumsum = 0
+# keep_idx = []
+# for i, l in enumerate(lens):
+#     # clip l at 4096
+#     l = min(l, 4096)
+#     if cumsum + l <= target_len:
+#         cumsum += l
+#         keep_idx.append(i)
+#     else:
+#         break
 
-ds['train'] = ds['train'].select(keep_idx)
-print(f"Kept {len(keep_idx)} examples with total {cumsum} tokens")
+# ds['train'] = ds['train'].select(keep_idx)
+# print(f"Kept {len(keep_idx)} examples with total {cumsum} tokens")
 
-ds_out_name = 'Asap7772/Asap7772open_web_math_qav3_none'
+ds_out_name = 'obiwan96/obiwan96open_web_math_qav3_none'
 ds.push_to_hub(ds_out_name)
 
 # save as train.parquet and test.parquet
-ds['train'].to_parquet('/home/anikait.singh/rl_behaviors/data_math_qv3/train.parquet')
-ds['test'].to_parquet('/home/anikait.singh/rl_behaviors/data_math_qv3/test.parquet')
+if not os.path.exists('/home/kanishk/ba/owm_mathv3'):
+    os.makedirs('/home/kanishk/ba/owm_mathv3')
+ds['train'].to_parquet('/home/kanishk/ba/owm_mathv3/train.parquet')
+ds['test'].to_parquet('/home/kanishk/ba/owm_mathv3/test.parquet')
