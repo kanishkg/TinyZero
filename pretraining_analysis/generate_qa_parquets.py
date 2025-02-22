@@ -2,8 +2,7 @@ import os
 import numpy as np
 import datasets
 from transformers import AutoTokenizer
-
-
+from tqdm import tqdm
 
 # data_names = [
 #     'obiwan96/obiwan96open_web_math_qav2_0_11616', 
@@ -67,10 +66,8 @@ ds = ds.map(lambda x: {'query': prefix.format(query=x['query']), 'completion': '
 # delete all columns except query and completion
 ds = ds.remove_columns([col for col in ds.column_names if col not in ['query', 'completion']])
 
-# create train and validation splits
-ds = ds.train_test_split(test_size=0.05)
 
-train_completion = ds['train']['completion']
+train_completion = ds['completion']
 tokenizer = AutoTokenizer.from_pretrained('meta-llama/Llama-3.1-8B')
 tokens = tokenizer(train_completion)
 lens = [len(t) for t in tokens['input_ids']]
@@ -79,6 +76,39 @@ print(f"Min length: {min(lens)}")
 print(f"Mean length: {np.mean(lens)}")
 print(f"Median length: {np.median(lens)}")
 print(f"Total tokens: {sum(lens)}")
+print(f"Number of completions: {len(lens)}")
+# do the same for queries
+query_tokens = tokenizer(ds['query'])
+query_lens = [len(t) for t in query_tokens['input_ids']]
+print(f"Max query length: {max(query_lens)}")
+print(f"Min query length: {min(query_lens)}")
+print(f"Mean query length: {np.mean(query_lens)}")
+print(f"Median query length: {np.median(query_lens)}")
+print(f"Total query tokens: {sum(query_lens)}")
+print(f"Number of queries: {len(query_lens)}")
+
+# trim max seq length (query + completion) to 4096
+new_dataset = []
+skipped = 0
+for i in range(len(ds)):
+    if query_lens[i] > 4096:
+        skipped += 1
+        continue
+    elif query_lens[i] + lens[i] > 4096:
+        completion_len = 4096 - query_lens[i]
+        query_text = ds['query'][i]
+        completion_text = tokenizer.decode(tokens['input_ids'][i][:completion_len])
+        new_dataset.append({'query': query_text, 'completion': completion_text})
+    else:
+        query_text = ds['query'][i]
+        completion_text = ds['completion'][i]
+        new_dataset.append({'query': query_text, 'completion': completion_text})
+
+print(f"Number of examples in new dataset: {len(new_dataset)}")
+print(f"Number of examples skipped: {skipped}")
+new_dataset = datasets.Dataset.from_list(new_dataset)
+new_dataset = new_dataset.train_test_split(test_size=0.05)
+
 # target_len = 8300000
 # cumsum = 0
 # keep_idx = []
@@ -94,11 +124,11 @@ print(f"Total tokens: {sum(lens)}")
 # ds['train'] = ds['train'].select(keep_idx)
 # print(f"Kept {len(keep_idx)} examples with total {cumsum} tokens")
 
-ds_out_name = 'obiwan96/obiwan96open_web_math_qav3_none'
-ds.push_to_hub(ds_out_name)
+ds_out_name = 'obiwan96/obiwan96open_web_math_qav3'
+new_dataset.push_to_hub(ds_out_name)
 
 # save as train.parquet and test.parquet
 if not os.path.exists('/home/kanishk/ba/owm_mathv3'):
     os.makedirs('/home/kanishk/ba/owm_mathv3')
-ds['train'].to_parquet('/home/kanishk/ba/owm_mathv3/train.parquet')
-ds['test'].to_parquet('/home/kanishk/ba/owm_mathv3/test.parquet')
+new_dataset['train'].to_parquet('/home/kanishk/ba/owm_mathv3/train.parquet')
+new_dataset['test'].to_parquet('/home/kanishk/ba/owm_mathv3/test.parquet')
