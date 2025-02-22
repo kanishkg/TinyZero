@@ -76,7 +76,7 @@ print(f"Min length: {min(lens)}")
 print(f"Mean length: {np.mean(lens)}")
 print(f"Median length: {np.median(lens)}")
 print(f"Total tokens: {sum(lens)}")
-
+print(f"Number of completions: {len(lens)}")
 # do the same for queries
 query_tokens = tokenizer(ds['query'])
 query_lens = [len(t) for t in query_tokens['input_ids']]
@@ -85,6 +85,7 @@ print(f"Min query length: {min(query_lens)}")
 print(f"Mean query length: {np.mean(query_lens)}")
 print(f"Median query length: {np.median(query_lens)}")
 print(f"Total query tokens: {sum(query_lens)}")
+print(f"Number of queries: {len(query_lens)}")
 
 # trim max seq length (query + completion) to 4096
 new_dataset = []
