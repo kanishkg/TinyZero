@@ -12,15 +12,13 @@ export HF_DATASETS_CACHE=$hf_cache_dir
 export HF_TOKEN='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'
 
 models=(
-    meta-llama/Llama-3.2-3B
-    /home/anikait.singh/rl_behaviors/sft/owmathqa_method/global_step_1344
-    Qwen/Qwen2.5-3B
+    /home/anikait.singh/rl_behaviors/sft/math-pretraineddata-sft-Llama-3.2-3B-method-epochs5-lr1e-5-exp0/global_step_260
+    /home/anikait.singh/rl_behaviors/sft/math-pretraineddata-sft-Llama-3.2-3B-method-epochs5-lr1e-6-exp1/global_step_650
 )
 num_models=${#models[@]}
 names=(
-    math-llama3b-base-n4-answertag
-    math-llama3b-method-n4-answertag
-    math-qwen3b-base-n4-answertag
+    math-llama3b-method-pretrain-1e5
+    math-llama3b-method-pretrain-1e6
 )
 num_names=${#names[@]}
 # data_dir="/home/anikait.singh/rl_behaviors/data_countdown"
@@ -32,7 +30,6 @@ if [ ! -d $data_dir ]; then
 fi
 
 gpus=(
-    "0,1,2,3,4,5,6,7"
     "0,1,2,3,4,5,6,7"
     "0,1,2,3,4,5,6,7"
 )

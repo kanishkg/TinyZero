@@ -21,17 +21,16 @@ model_names=(
 )
 
 epochs=(
-  2
   5
 )
 
 lrs=(
+  1e-5
   1e-6
-  1e-7
 )
 
 # Base path for dataset files
-base_data_path="/home/anikait.singh/rl_behaviors/cot_datasets/pretrained_data"
+base_data_path="/home/anikait.singh/rl_behaviors/cot_datasets/data_math_qv3"
 
 # Shared training parameters
 prompt_key="query"
@@ -42,7 +41,7 @@ train_batch_size=80
 max_length=4096
 default_hdfs_dir="/home/anikait.singh/rl_behaviors/hdfs"
 default_local_dir="/home/anikait.singh/rl_behaviors/sft"
-project_name="countdown-pretraineddata-sft"
+project_name="math-pretraineddata-sft-0222"
 total_epochs=1
 logger="['console','wandb']"
 lr=1e-5
@@ -67,7 +66,7 @@ for lr in "${lrs[@]}"; do
   val_file="${base_data_path}/${condition}/test.parquet"
 
   model_name_short=$(echo $model_name | cut -d'/' -f2)
-  experiment_name="countdown-pretraineddata-sft-${model_name_short}-${condition}-epochs${total_epochs}-lr${lr}-exp${exp_num}"
+  experiment_name="math-pretraineddata-sft-${model_name_short}-${condition}-epochs${total_epochs}-lr${lr}-exp${exp_num}"
   # save_dir="${default_local_dir}/${model_name_short}/${condition}/${total_epochs}/${lr}/${exp_num}"
   save_dir="${default_local_dir}/${experiment_name}"
   mkdir -p $save_dir

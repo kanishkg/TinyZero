@@ -10,10 +10,35 @@ from transformers import AutoTokenizer
 #     'obiwan96/obiwan96open_web_math_qav2_34848_46467',
 # ]
 data_names = [
-    'obiwan96/obiwan96open_web_math_qav2_none_0_100000',
-    'obiwan96/obiwan96open_web_math_qav2_none_100000_200000',
-    'obiwan96/obiwan96open_web_math_qav2_none_200000_300000',
-    'obiwan96/obiwan96open_web_math_qav2_none_300000_400000',
+    # 'obiwan96/obiwan96open_web_math_qav2_none_0_100000',
+    # 'obiwan96/obiwan96open_web_math_qav2_none_100000_200000',
+    # 'obiwan96/obiwan96open_web_math_qav2_none_200000_300000',
+    # 'obiwan96/obiwan96open_web_math_qav2_none_300000_400000',
+    
+    'Asap7772/Asap7772open_web_math_qav3_68750_75000',
+    'Asap7772/Asap7772open_web_math_qav3_93750_100000',
+    'Asap7772/Asap7772open_web_math_qav3_56250_62500',
+    'Asap7772/Asap7772open_web_math_qav3_50000_56250',
+    'Asap7772/Asap7772open_web_math_qav3_62500_68750',
+    'Asap7772/Asap7772open_web_math_qav3_81250_87500',
+    'Asap7772/Asap7772open_web_math_qav3_87500_93750',
+    'Asap7772/Asap7772open_web_math_qav3_75000_81250',
+    'Asap7772/Asap7772open_web_math_qav3_575000_600000',
+    'Asap7772/Asap7772open_web_math_qav3_450000_475000',
+    'Asap7772/Asap7772open_web_math_qav3_475000_500000',
+    'Asap7772/Asap7772open_web_math_qav3_400000_425000',
+    'Asap7772/Asap7772open_web_math_qav3_550000_575000',
+    'Asap7772/Asap7772open_web_math_qav3_425000_450000',
+    'Asap7772/Asap7772open_web_math_qav3_500000_525000',
+    'Asap7772/Asap7772open_web_math_qav3_525000_550000',
+    'obiwan96/obiwan96open_web_math_qav3_300000_350000',
+    'obiwan96/obiwan96open_web_math_qav3_350000_400000',
+    'obiwan96/obiwan96open_web_math_qav3_250000_300000',
+    'obiwan96/obiwan96open_web_math_qav3_200000_250000',
+    'obiwan96/obiwan96open_web_math_qav3_150000_200000',
+    'obiwan96/obiwan96open_web_math_qav3_0_50000',
+    'obiwan96/obiwan96open_web_math_qav3_100000_150000',
+
 ]
 all_ds = []
 for data_name in data_names:
@@ -62,9 +87,9 @@ for i, l in enumerate(lens):
 ds['train'] = ds['train'].select(keep_idx)
 print(f"Kept {len(keep_idx)} examples with total {cumsum} tokens")
 
-ds_out_name = 'obiwan96/obiwan96open_web_math_qav2_none'
+ds_out_name = 'Asap7772/Asap7772open_web_math_qav3_none'
 ds.push_to_hub(ds_out_name)
 
 # save as train.parquet and test.parquet
-ds['train'].to_parquet('train.parquet')
-ds['test'].to_parquet('test.parquet')
+ds['train'].to_parquet('/home/anikait.singh/rl_behaviors/data_math_qv3/train.parquet')
+ds['test'].to_parquet('/home/anikait.singh/rl_behaviors/data_math_qv3/test.parquet')

@@ -5,9 +5,9 @@ import subprocess
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--start', type=int, default=400000,
+    parser.add_argument('--start', type=int, default=50000,
                         help='Starting shard index (inclusive)')
-    parser.add_argument('--end', type=int, default=600000,
+    parser.add_argument('--end', type=int, default=100000,
                         help='Ending shard index (exclusive)')
     parser.add_argument('--num_nodes', type=int, default=2,
                         help='Total number of nodes to use')
