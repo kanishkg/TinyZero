@@ -21,7 +21,7 @@ model_names=(
 )
 
 epochs=(
-  5
+  2
 )
 
 lrs=(
@@ -41,10 +41,10 @@ train_batch_size=80
 max_length=4096
 default_hdfs_dir="/home/anikait.singh/rl_behaviors/hdfs"
 default_local_dir="/home/anikait.singh/rl_behaviors/sft"
-project_name="math-pretraineddata-sft-0222"
-total_epochs=1
+project_name="math-pretraineddata-sft-0223"
 logger="['console','wandb']"
-lr=1e-5
+warmup_steps_ratio=0.01
+weight_decay=0.01
 
 exp_num=0
 dry_run=false
@@ -93,7 +93,9 @@ for lr in "${lrs[@]}"; do
     trainer.experiment_name="${experiment_name}" \
     trainer.total_epochs="${total_epochs}" \
     trainer.logger="${logger}" \
-    optim.lr="${lr}" 
+    optim.lr="${lr}" \
+    optim.warmup_steps_ratio=$warmup_steps_ratio \
+    optim.weight_decay=$weight_decay
   echo "--------------------------------------------------"
 
   exp_num=$((exp_num+1))
