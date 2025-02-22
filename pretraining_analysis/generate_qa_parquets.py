@@ -89,9 +89,11 @@ print(f"Total query tokens: {sum(query_lens)}")
 
 # trim max seq length (query + completion) to 4096
 new_dataset = []
+skipped = 0
 for i in range(len(ds)):
     if query_lens[i] + lens[i] > 4096:
         if query_lens[i] > 4096:
+            skipped += 1
             continue
         elif query_lens[i] + lens[i] > 4096:
             completion_len = 4096 - query_lens[i]
@@ -103,6 +105,8 @@ for i in range(len(ds)):
             completion_text = ds['completion'][i]
             new_dataset.append({'query': query_text, 'completion': completion_text})
 
+print(f"Number of examples in new dataset: {len(new_dataset)}")
+print(f"Number of examples skipped: {skipped}")
 new_dataset = datasets.Dataset.from_list(new_dataset)
 new_dataset = new_dataset.train_test_split(test_size=0.05)
 
