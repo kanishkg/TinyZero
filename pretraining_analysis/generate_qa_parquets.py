@@ -89,7 +89,7 @@ print(f"Total query tokens: {sum(query_lens)}")
 # trim max seq length (query + completion) to 4096
 new_dataset = []
 skipped = 0
-for i in tqdm(range(len(ds['query']))):
+for i in tqdm(range(len(query_lens))):
     if query_lens[i] + lens[i] > 4096:
         if query_lens[i] > 4096:
             skipped += 1
