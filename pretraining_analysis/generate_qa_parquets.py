@@ -91,19 +91,18 @@ print(f"Number of queries: {len(query_lens)}")
 new_dataset = []
 skipped = 0
 for i in range(len(ds)):
-    if query_lens[i] + lens[i] > 4096:
-        if query_lens[i] > 4096:
-            skipped += 1
-            continue
-        elif query_lens[i] + lens[i] > 4096:
-            completion_len = 4096 - query_lens[i]
-            query_text = ds['query'][i]
-            completion_text = tokenizer.decode(tokens['input_ids'][i][:completion_len])
-            new_dataset.append({'query': query_text, 'completion': completion_text})
-        else:
-            query_text = ds['query'][i]
-            completion_text = ds['completion'][i]
-            new_dataset.append({'query': query_text, 'completion': completion_text})
+    if query_lens[i] > 4096:
+        skipped += 1
+        continue
+    elif query_lens[i] + lens[i] > 4096:
+        completion_len = 4096 - query_lens[i]
+        query_text = ds['query'][i]
+        completion_text = tokenizer.decode(tokens['input_ids'][i][:completion_len])
+        new_dataset.append({'query': query_text, 'completion': completion_text})
+    else:
+        query_text = ds['query'][i]
+        completion_text = ds['completion'][i]
+        new_dataset.append({'query': query_text, 'completion': completion_text})
 
 print(f"Number of examples in new dataset: {len(new_dataset)}")
 print(f"Number of examples skipped: {skipped}")
