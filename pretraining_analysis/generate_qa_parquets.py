@@ -77,6 +77,8 @@ lens = [len(t) for t in tokens['input_ids']]
 print(f"Max length: {max(lens)}")
 print(f"Min length: {min(lens)}")
 print(f"Mean length: {np.mean(lens)}")
+print(f"Median length: {np.median(lens)}")
+print(f"Total tokens: {sum(lens)}")
 # target_len = 8300000
 # cumsum = 0
 # keep_idx = []
