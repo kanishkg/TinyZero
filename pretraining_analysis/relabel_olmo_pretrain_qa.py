@@ -9,6 +9,7 @@ import re
 
 
 parser = argparse.ArgumentParser()
+parser.add_argument('--dataset_name', type=str, default='finemath', help='Dataset name')
 parser.add_argument('--start', type=int, default=-1, help='Shard to process')
 parser.add_argument('--end', type=int, default=-1, help='Number of shards to process')
 parser.add_argument('--split', type=str, default='train', help='Split to process')
@@ -134,7 +135,12 @@ Now do it for this text:""",
 
 }
 
-    ds = datasets.load_dataset('Asap7772/open-web-math-processed-v2', num_proc=os.cpu_count()-2, split=args.split)
+    if args.dataset_name == 'finemath':
+        ds = datasets.load_dataset("HuggingFaceTB/finemath", "finemath-4plus", split=args.split, num_proc=os.cpu_count()-2)
+    elif args.dataset_name == 'openwebmath':
+        ds = datasets.load_dataset('Asap7772/open-web-math-processed-v2', num_proc=os.cpu_count()-2, split=args.split)
+    else:
+        raise ValueError(f"Unknown dataset name: {args.dataset_name}")
         
     if args.max_examples > 0:
         ds = ds.select(range(args.max_examples))
@@ -144,8 +150,9 @@ Now do it for this text:""",
         ds = ds.select(range(args.start, args.end))
     
     # filter examples where 'contain_problem' is no or 'contain_solution' is no
-    ds = ds.filter(lambda x: x['contain_problem'] != 'no' and x['contain_solution'] != 'no')
-    print(f"Number of examples after filtering: {len(ds)}")
+    if args.dataset_name == 'openwebmath':
+        ds = ds.filter(lambda x: x['contain_problem'] != 'no' and x['contain_solution'] != 'no')
+        print(f"Number of examples after filtering: {len(ds)}")
 
     llm = LLM(
         model='Qwen/Qwen2.5-32B-Instruct',

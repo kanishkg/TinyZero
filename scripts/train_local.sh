@@ -12,13 +12,13 @@ export HF_DATASETS_CACHE=$hf_cache_dir
 export HF_TOKEN='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'
 
 models=(
-    /home/anikait.singh/rl_behaviors/sft/math-pretraineddata-sft-Llama-3.2-3B-method-epochs5-lr1e-5-exp0/global_step_260
-    /home/anikait.singh/rl_behaviors/sft/math-pretraineddata-sft-Llama-3.2-3B-method-epochs5-lr1e-6-exp1/global_step_650
+    /home/anikait.singh/rl_behaviors/sft/math-pretraineddata-sft-Llama-3.2-3B-method-epochs2-lr1e-5-exp0/global_step_3584
+    /home/anikait.singh/rl_behaviors/sft/math-pretraineddata-sft-Llama-3.2-3B-method-epochs2-lr1e-6-exp1/global_step_3584
 )
 num_models=${#models[@]}
 names=(
-    math-llama3b-method-pretrain-1e5
-    math-llama3b-method-pretrain-1e6
+    math-llama3b-method-pretrain-filtered-1e5
+    math-llama3b-method-pretrain-filtered-1e6
 )
 num_names=${#names[@]}
 # data_dir="/home/anikait.singh/rl_behaviors/data_countdown"
