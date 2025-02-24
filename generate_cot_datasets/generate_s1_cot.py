@@ -95,7 +95,7 @@ message_batch = client.messages.batches.create(requests=requests[:2])
 batch_id = message_batch.id
 print(f"Batch {batch_id} submitted successfully")
 
-import datetime
+from datetime import datetime, timedelta
 import time
 start_time = datetime.datetime.now()
 end_time = start_time + datetime.timedelta(hours=24)
