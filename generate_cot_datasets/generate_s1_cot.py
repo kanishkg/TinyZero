@@ -69,6 +69,7 @@ for s, sample in enumerate(s1ds["train"]):
                         {
                             "type": "text",
                             "text": PROMPT,
+                            "cache_control": {"type": "ephemeral"}
                         }
                     ],
                     messages=[
