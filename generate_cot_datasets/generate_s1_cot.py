@@ -64,7 +64,6 @@ for s, sample in enumerate(s1ds["train"]):
                 params=MessageCreateParamsNonStreaming(
                     model="claude-3-5-sonnet-20241022",
                     max_tokens=2048,
-                    temperature=0.7,
                     system=[
                         {
                             "type": "text",
