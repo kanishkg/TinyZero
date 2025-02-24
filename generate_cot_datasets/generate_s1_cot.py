@@ -43,6 +43,7 @@ Remember:
 - It is required that you verify your work explicitly whenever you can and backtrack when needed.
 - Only write the final answer in <answer> </answer> tags.
 - You answer should always have mistakes, verification, and backtracking.
+Use up to 1000 words.
 """
 USER_PROMPT = "Solve the following problem: {question}"
 
@@ -59,7 +60,7 @@ answers = []
 for question in tqdm(questions):
     message = client.messages.create(
         model="claude-3-5-sonnet-20241022",
-        max_tokens=4096,
+        max_tokens=2948,
         temperature=0.7,
         system=PROMPT,
         messages=[
