@@ -55,29 +55,31 @@ s1ds = datasets.load_dataset("simplescaling/s1K")
 
 requests = []
 questions = []
-for sample in s1ds["train"]:
+for s, sample in enumerate(s1ds["train"]):
     question = sample["question"]
     questions.append(question)
     user_message = USER_PROMPT.format(question=question)
     requests.append(Request(
-        params=MessageCreateParamsNonStreaming(
-            model="claude-3-5-sonnet-20241022",
-            max_tokens=1600,
-            temperature=0.7,
-            messages=[
-            {
-                "role": "system",
-                "content": PROMPT,
-            },
-            {
-                "role": "user",
-                "content": [
-                    {
-                        "type": "text",
-                        "text": user_message
-                    }
-                ]
-            }])))
+                custom_id=f"s1-cot-{s}",
+                params=MessageCreateParamsNonStreaming(
+                    model="claude-3-5-sonnet-20241022",
+                    max_tokens=2048,
+                    temperature=0.7,
+                    system=[
+                        {
+                            "type": "text",
+                            "text": PROMPT,
+                        }
+                    ],
+                    messages=[
+                        {
+                            "role": "user",
+                            "content": user_message,
+                        }
+                    ]
+                )
+            ))
+
 
 answers = []
 message_batch = client.messages.create(requests=requests[:2])
