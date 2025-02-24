@@ -60,11 +60,12 @@ for sample in s1ds["train"]:
     questions.append(question)
     user_message = USER_PROMPT.format(question=question)
     requests.append(Request(
-        messages=[MessageCreateParamsNonStreaming(role="user", content=user_message)],
-        max_tokens=1600,
-        temperature=0.7,
-        system=PROMPT,
-        messages=[
+        params=MessageCreateParamsNonStreaming(
+            model="claude-3-5-sonnet-20241022",
+            max_tokens=1600,
+            temperature=0.7,
+            system=PROMPT,
+            messages=[
             {
                 "role": "user",
                 "content": [
@@ -73,8 +74,7 @@ for sample in s1ds["train"]:
                         "text": user_message
                     }
                 ]
-            }]
-    ))
+            }])))
 
 answers = []
 message_batch = client.messages.create(requests=requests[:2])
