@@ -64,8 +64,11 @@ for sample in s1ds["train"]:
             model="claude-3-5-sonnet-20241022",
             max_tokens=1600,
             temperature=0.7,
-            system=PROMPT,
             messages=[
+            {
+                "role": "system",
+                "content": PROMPT,
+            },
             {
                 "role": "user",
                 "content": [
