@@ -91,7 +91,7 @@ request_map = {
         }
         
 answers = []
-message_batch = client.messages.batches.create(requests=requests[:2])
+message_batch = client.messages.batches.create(requests=requests)
 batch_id = message_batch.id
 print(f"Batch {batch_id} submitted successfully")
 
