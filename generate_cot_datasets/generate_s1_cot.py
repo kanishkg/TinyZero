@@ -3,6 +3,8 @@ from tqdm import tqdm
 
 import datasets
 import anthropic
+from anthropic.types.message_create_params import MessageCreateParamsNonStreaming
+from anthropic.types.messages.batch_create_params import Request
 
 
 
@@ -51,30 +53,32 @@ client = anthropic.Anthropic()
 
 s1ds = datasets.load_dataset("simplescaling/s1K")
 
+requests = []
 questions = []
 for sample in s1ds["train"]:
     question = sample["question"]
-    questions.append(USER_PROMPT.format(question=question))
-
-answers = []
-for question in tqdm(questions):
-    message = client.messages.create(
-        model="claude-3-5-sonnet-20241022",
-        max_tokens=2948,
+    questions.append(question)
+    user_message = USER_PROMPT.format(question=question)
+    requests.append(Request(
+        messages=[MessageCreateParamsNonStreaming(role="user", content=user_message)],
+        max_tokens=1600,
         temperature=0.7,
         system=PROMPT,
         messages=[
             {
                 "role": "user",
                 "content": [
-                {
-                    "type": "text",
+                    {
+                        "type": "text",
                         "text": question
                     }
                 ]
-            }
-        ]
-    )
+            }]
+    ))
+
+answers = []
+message_batch = client.messages.create(requests=requests[:2])
+for message in message_batch.messages:
     answers.append(message.content[0].text)
 
 new_dataset = datasets.Dataset.from_dict({"question": questions, "answer": answers})
