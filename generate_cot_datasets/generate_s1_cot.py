@@ -77,4 +77,4 @@ for question in tqdm(questions):
     answers.append(message.content[0].text)
 
 new_dataset = datasets.Dataset.from_dict({"question": questions, "answer": answers})
-new_dataset.push_to_hub("obiwan96/s1-claude")
+new_dataset.push_to_hub("obiwan96/s1-claude-v2")
