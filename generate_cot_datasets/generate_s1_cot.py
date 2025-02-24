@@ -1,4 +1,5 @@
 import json
+from tqdm import tqdm
 
 import datasets
 import anthropic
@@ -18,23 +19,32 @@ Requirements for the answer:
 
 Problem-solving principles to follow:
 - Verify your work explicitly whenever you can and backtrack when needed
-- Consider working backwards from the goal state
+    For example, use phrases like:
+    - "Let me check if my answer is correct"
+    - "This doesn't seem right, let me try something else"
+    - "Let me check my work"
+    - "Let's substitute the value of x into the equation"
 - Break down complex goals into manageable sub-goals
+    - Use phrases like:
+    - "Let me break this down into smaller steps"
+    - "To solve this problem, I first need to..."
 - If stuck, return to a previous state and try a different approach
-
+    - Use phrases like:
+    - "Let me go back and correct my previous step"
+    - "Let me go back and try a different approach"
 Format for writing solutions:
 <think> thoughts here </think>
 <answer> answer </answer>
 
 Remember:
-- Always verify your solution path
-- Show clear reasoning for each step
-- Backtrack when needed
-- Document attempts and why certain paths weren't pursued
-- Explain why certain sub-goals were chosen
+- It is necessary to show your work in <think> </think> tags.
+- It is required that you makes some mistakes in your reasoning and verify your work and then backtrack to correct your mistakes.
+- It is required that you break down complex goals into manageable sub-goals.
+- It is required that you verify your work explicitly whenever you can and backtrack when needed.
+- Only write the final answer in <answer> </answer> tags.
+- You answer should always have mistakes, verification, and backtracking.
 """
 USER_PROMPT = "Solve the following problem: {question}"
-
 
 client = anthropic.Anthropic()
 
@@ -46,7 +56,7 @@ for sample in s1ds["train"]:
     questions.append(USER_PROMPT.format(question=question))
 
 answers = []
-for question in questions:
+for question in tqdm(questions):
     message = client.messages.create(
         model="claude-3-5-sonnet-20241022",
         max_tokens=4096,
@@ -58,10 +68,10 @@ for question in questions:
                 "content": [
                 {
                     "type": "text",
-                    "text": question
-                }
-            ]
-        }
+                        "text": question
+                    }
+                ]
+            }
         ]
     )
     answers.append(message.content[0].text)
