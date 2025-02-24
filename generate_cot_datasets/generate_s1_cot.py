@@ -97,8 +97,8 @@ print(f"Batch {batch_id} submitted successfully")
 
 from datetime import datetime, timedelta
 import time
-start_time = datetime.datetime.now()
-end_time = start_time + datetime.timedelta(hours=24)
+start_time = datetime.now()
+end_time = start_time + timedelta(hours=24)
 poll_interval = 60  # Start with 1 minute interval
 
 print(f"Starting to poll batch {batch_id}")
