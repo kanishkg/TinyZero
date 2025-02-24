@@ -14,6 +14,7 @@ ds = ds.map(lambda x: {'query': template.format(query=x['query']), 'completion':
 
 
 # make train test split
+ds = ds['train']
 ds = ds.train_test_split(test_size=0.05)
 
 ds.push_to_hub("obiwan96/s1-claude-sft")
