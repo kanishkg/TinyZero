@@ -13,7 +13,6 @@ Assistant: Let me solve this step by step."""
 ds = ds.map(lambda x: {'query': template.format(query=x['query']), 'completion': x['completion'].replace('Let me solve this step by step.', '')})
 
 ds = ds.remove_columns([col for col in ds.column_names if col not in ['query', 'completion']])
-ds = ds['train']
 
 # make train test split
 ds = ds.train_test_split(test_size=0.05)
