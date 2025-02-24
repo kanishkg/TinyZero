@@ -1,6 +1,6 @@
 import datasets
 
-ds = datasets.load_dataset("obiwan96/s1-claude")
+ds = datasets.load_dataset("obiwan96/s1-claude-v2")
 
 # rename columns
 ds = ds.rename_column("question", "query")
