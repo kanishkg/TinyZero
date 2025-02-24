@@ -64,6 +64,7 @@ for s, sample in enumerate(s1ds["train"]):
                 params=MessageCreateParamsNonStreaming(
                     model="claude-3-5-sonnet-20241022",
                     max_tokens=2048,
+                    temperature=0.7,
                     system=[
                         {
                             "type": "text",
@@ -81,10 +82,61 @@ for s, sample in enumerate(s1ds["train"]):
             ))
 
 
+request_map = {
+        req['custom_id']: {
+                "prompt": req['params']['messages'][0]['content'],
+                "system": req['params']['system'][0]['text'],
+            }
+            for req in requests
+        }
+        
 answers = []
-message_batch = client.messages.create(requests=requests[:2])
-for message in message_batch.messages:
-    answers.append(message.content[0].text)
+message_batch = client.messages.batches.create(requests=requests[:2])
+batch_id = message_batch.id
+print(f"Batch {batch_id} submitted successfully")
 
+import datetime
+import time
+start_time = datetime.datetime.now()
+end_time = start_time + datetime.timedelta(hours=24)
+poll_interval = 60  # Start with 1 minute interval
+
+print(f"Starting to poll batch {batch_id}")
+print(f"Will poll until {end_time} or batch completion")
+
+while datetime.now() < end_time:
+    try:
+        batch_status = client.messages.batches.retrieve(batch_id)
+        
+        counts = batch_status.request_counts
+        total = sum([counts.processing, counts.succeeded, counts.errored, 
+                    counts.canceled, counts.expired])
+        processed = counts.succeeded + counts.errored
+
+        if counts.errored > 0:
+            breakpoint()
+        
+        print(f"Batch {batch_id} status: {batch_status.processing_status}")
+        print(f"Status: {processed}/{total} requests processed")
+        print(f"Succeeded: {counts.succeeded}, Errored: {counts.errored}, "
+                f"Canceled: {counts.canceled}, Expired: {counts.expired}")
+        
+        if batch_status.processing_status == "ended":
+            print("Batch processing completed!")
+            break
+        
+        time.sleep(poll_interval)
+        poll_interval = min(poll_interval * 1.5, 120)
+        
+    except Exception as e:
+        print(f"Error polling batch status: {str(e)}")
+        time.sleep(poll_interval)
+
+answers = []
+for r,result in enumerate(client.messages.batches.results(batch_id)):
+    if result.result.type == "succeeded":
+        prompts = request_map[result.custom_id]
+        answers.append(result.result.message.content[0].text)
+        
 new_dataset = datasets.Dataset.from_dict({"question": questions, "answer": answers})
 new_dataset.push_to_hub("obiwan96/s1-claude-v2")
