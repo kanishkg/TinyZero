@@ -70,7 +70,7 @@ for sample in s1ds["train"]:
                 "content": [
                     {
                         "type": "text",
-                        "text": question
+                        "text": user_message
                     }
                 ]
             }]
