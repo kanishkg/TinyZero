@@ -104,7 +104,7 @@ def main(args):
         prompts = get_prompts(curr_batch, tokenizer, prompt_templates)
 
         sampling_params = SamplingParams(
-            max_tokens=256,
+            max_tokens=1024,
             temperature=0,
         )
         responses = llm.generate(prompts, sampling_params=sampling_params)
