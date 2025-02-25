@@ -123,7 +123,7 @@ Use about 500 words for the thoughts section.
 Now do it for this text:""",
 
     'qa_none': """Your goal is to split the text into a question, thought and an answer.
-Make sure that the question and answer are in the text. 
+Make sure that the question, thoughts and answer are in the text. 
 Paraphrase the answer so that the answer is cleaned up. Make sure that the answer has steps to find the solution.    
 Write the question in <question>...</question>.
 Write the process in <thoughts>steps to find the solution</thoughts> and the final answer in <answer>...</answer>.
