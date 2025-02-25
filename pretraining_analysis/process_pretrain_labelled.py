@@ -130,7 +130,7 @@ def map_fn_subgoal(examples):
             
     return ret_dict
 
-dataset_name = 'obiwan96/obiwan96open_web_math_raw_v3_0_200000'
+dataset_name = 'obiwan96/open_web_math_raw_v3_0_200000'
 ds = datasets.load_dataset(dataset_name, split='train')
 
 # Apply the mapping functions
