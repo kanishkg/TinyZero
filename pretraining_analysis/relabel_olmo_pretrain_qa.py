@@ -31,7 +31,7 @@ def get_prompts(ds, tokenizer, prompt_templates):
             samples += [ds['text'][e]]
 
     for example in tqdm(samples, desc="Generating prompts"):
-        prompt = prompt_templates['qa_none'] + f"\n<text>\n{example}\n</text>"
+        prompt = prompt_templates['qa3'] + f"\n<text>\n{example}\n</text>"
         prompt = [{'role': 'user', 'content': prompt}, {'role': 'assistant', 'content': ''}]
         prompts += [prompt]
   
