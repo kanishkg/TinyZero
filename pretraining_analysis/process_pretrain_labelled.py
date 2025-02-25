@@ -41,7 +41,7 @@ def map_fn_backtrack(examples):
             extracted_vars = {}  # Use an empty dict if extraction fails
         
         required_keys = ['Thoughts', 'Does Backtrack?', 'Number of backtrack steps']
-        mapped_keys = ['thoughts', 'is_backtrack', 'backtrack_count', 'backtrack_rationale']
+        mapped_keys = ['thoughts_backtrack', 'is_backtrack', 'backtrack_count']
         
         # Check if all required keys are present
         if all(key in extracted_vars for key in required_keys):
@@ -68,7 +68,7 @@ def map_fn_backchain(examples):
             extracted_vars = {}
         
         required_keys = ['Thoughts', 'Does the text exhibit backward chaining?', 'Number of backward chaining instances']
-        mapped_keys = ['thoughts', 'is_backchain', 'backchain_count']
+        mapped_keys = ['thoughts_backchain', 'is_backchain', 'backchain_count']
         
         if all(key in extracted_vars for key in required_keys):
             for key, mapped_key in zip(required_keys, mapped_keys):
@@ -92,7 +92,7 @@ def map_fn_verification(examples):
             extracted_vars = {}
         
         required_keys = ['Thoughts', 'Does verification?', 'Number of answer verification steps']
-        mapped_keys = ['thoughts', 'is_verification', 'verification_count']
+        mapped_keys = ['thoughts_verification', 'is_verification', 'verification_count']
         
         if all(key in extracted_vars for key in required_keys):
             for key, mapped_key in zip(required_keys, mapped_keys):
@@ -116,7 +116,7 @@ def map_fn_subgoal(examples):
             extracted_vars = {}
         
         required_keys = ['Thoughts', 'Does subgoal setting?', 'Number of subgoal setting steps']
-        mapped_keys = ['thoughts', 'is_subgoal', 'subgoal_count']
+        mapped_keys = ['thoughts_subgoal', 'is_subgoal', 'subgoal_count']
         
         if all(key in extracted_vars for key in required_keys):
             for key, mapped_key in zip(required_keys, mapped_keys):
@@ -134,10 +134,10 @@ dataset_name = 'obiwan96/open_web_math_raw_v3_0_200000'
 ds = datasets.load_dataset(dataset_name, split='train')
 
 # Apply the mapping functions
-ds = ds.map(map_fn_backtrack, batched=True, remove_columns=ds.column_names, num_proc=os.cpu_count())
-ds = ds.map(map_fn_backchain, batched=True, remove_columns=ds.column_names, num_proc=os.cpu_count())
-ds = ds.map(map_fn_verification, batched=True, remove_columns=ds.column_names, num_proc=os.cpu_count())
-ds = ds.map(map_fn_subgoal, batched=True, remove_columns=ds.column_names, num_proc=os.cpu_count())
+ds = ds.map(map_fn_backtrack, batched=True, remove_columns=ds.column_names, num_proc=64)
+ds = ds.map(map_fn_backchain, batched=True, remove_columns=ds.column_names, num_proc=64)
+ds = ds.map(map_fn_verification, batched=True, remove_columns=ds.column_names, num_proc=64)
+ds = ds.map(map_fn_subgoal, batched=True, remove_columns=ds.column_names, num_proc=64)
 
 ds.push_to_hub('obiwan96/open_web_math_raw_v3_0_200000_processed')
 
