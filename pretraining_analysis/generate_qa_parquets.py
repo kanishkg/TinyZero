@@ -87,28 +87,6 @@ print(f"Median query length: {np.median(query_lens)}")
 print(f"Total query tokens: {sum(query_lens)}")
 print(f"Number of queries: {len(query_lens)}")
 
-# trim max seq length (query + completion) to 4096
-new_dataset = []
-skipped = 0
-for i in range(len(ds)):
-    if query_lens[i] > 4096:
-        skipped += 1
-        continue
-    elif query_lens[i] + lens[i] > 4096:
-        completion_len = 4096 - query_lens[i]
-        query_text = ds['query'][i]
-        completion_text = tokenizer.decode(tokens['input_ids'][i][:completion_len])
-        new_dataset.append({'query': query_text, 'completion': completion_text})
-    else:
-        query_text = ds['query'][i]
-        completion_text = ds['completion'][i]
-        new_dataset.append({'query': query_text, 'completion': completion_text})
-
-print(f"Number of examples in new dataset: {len(new_dataset)}")
-print(f"Number of examples skipped: {skipped}")
-new_dataset = datasets.Dataset.from_list(new_dataset)
-new_dataset = new_dataset.train_test_split(test_size=0.05)
-
 # target_len = 8300000
 # cumsum = 0
 # keep_idx = []
@@ -125,10 +103,11 @@ new_dataset = new_dataset.train_test_split(test_size=0.05)
 # print(f"Kept {len(keep_idx)} examples with total {cumsum} tokens")
 
 ds_out_name = 'obiwan96/obiwan96open_web_math_qav3'
-new_dataset.push_to_hub(ds_out_name)
+ds = ds.train_test_split(test_size=0.05)
+ds.push_to_hub(ds_out_name)
 
 # save as train.parquet and test.parquet
 if not os.path.exists('/home/kanishk/ba/owm_mathv3'):
     os.makedirs('/home/kanishk/ba/owm_mathv3')
-new_dataset['train'].to_parquet('/home/kanishk/ba/owm_mathv3/train.parquet')
-new_dataset['test'].to_parquet('/home/kanishk/ba/owm_mathv3/test.parquet')
+ds['train'].to_parquet('/home/kanishk/ba/owm_mathv3/train.parquet')
+ds['test'].to_parquet('/home/kanishk/ba/owm_mathv3/test.parquet')
