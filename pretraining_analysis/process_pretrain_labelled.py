@@ -35,22 +35,28 @@ def map_fn_backtrack(examples):
     # Process each sample in the batch
     for i in range(len(examples['text'])):
         curr_backtrack = examples['backtracking_raw'][i]
-        try:
-            extracted_vars = extract_variables(curr_backtrack)
-        except Exception:
-            extracted_vars = {}  # Use an empty dict if extraction fails
-        
-        required_keys = ['Thoughts', 'Does Backtrack?', 'Number of backtrack steps']
-        mapped_keys = ['thoughts_backtrack', 'is_backtrack', 'backtrack_count']
-        
-        # Check if all required keys are present
-        if all(key in extracted_vars for key in required_keys):
-            for key, mapped_key in zip(required_keys, mapped_keys):
-                ret_dict.setdefault(mapped_key, []).append(extracted_vars[key])
+        count = re.findall(r'<count>(\d+)</count>', curr_backtrack)
+        if count:
+            count = int(count[0])
         else:
-            # Append default values if extraction is incomplete
-            for mapped_key in mapped_keys:
-                ret_dict.setdefault(mapped_key, []).append(None)
+            count = None
+        ret_dict['backtrack_count'] = count
+        # try:
+        #     extracted_vars = extract_variables(curr_backtrack)
+        # except Exception:
+        #     extracted_vars = {}  # Use an empty dict if extraction fails
+        
+        # required_keys = ['Thoughts', 'Does Backtrack?', 'Number of backtrack steps']
+        # mapped_keys = ['thoughts_backtrack', 'is_backtrack', 'backtrack_count']
+        
+        # # Check if all required keys are present
+        # if all(key in extracted_vars for key in required_keys):
+        #     for key, mapped_key in zip(required_keys, mapped_keys):
+        #         ret_dict.setdefault(mapped_key, []).append(extracted_vars[key])
+        # else:
+        #     # Append default values if extraction is incomplete
+        #     for mapped_key in mapped_keys:
+        #         ret_dict.setdefault(mapped_key, []).append(None)
         
         # Always append the original example values
         for k in examples.keys():
@@ -62,20 +68,26 @@ def map_fn_backchain(examples):
     ret_dict = {}
     for i in range(len(examples['text'])):
         curr_backchain = examples['backward_chaining_raw'][i]
-        try:
-            extracted_vars = extract_variables(curr_backchain)
-        except Exception:
-            extracted_vars = {}
-        
-        required_keys = ['Thoughts', 'Does the text exhibit backward chaining?', 'Number of backward chaining instances']
-        mapped_keys = ['thoughts_backchain', 'is_backchain', 'backchain_count']
-        
-        if all(key in extracted_vars for key in required_keys):
-            for key, mapped_key in zip(required_keys, mapped_keys):
-                ret_dict.setdefault(mapped_key, []).append(extracted_vars[key])
+        count = re.findall(r'<count>(\d+)</count>', curr_backchain)
+        if count:
+            count = int(count[0])
         else:
-            for mapped_key in mapped_keys:
-                ret_dict.setdefault(mapped_key, []).append(None)
+            count = None
+        ret_dict['backchain_count'] = count
+        # try:
+        #     extracted_vars = extract_variables(curr_backchain)
+        # except Exception:
+        #     extracted_vars = {}
+        
+        # required_keys = ['Thoughts', 'Does the text exhibit backward chaining?', 'Number of backward chaining instances']
+        # mapped_keys = ['thoughts_backchain', 'is_backchain', 'backchain_count']
+        
+        # if all(key in extracted_vars for key in required_keys):
+        #     for key, mapped_key in zip(required_keys, mapped_keys):
+        #         ret_dict.setdefault(mapped_key, []).append(extracted_vars[key])
+        # else:
+        #     for mapped_key in mapped_keys:
+        #         ret_dict.setdefault(mapped_key, []).append(None)
         
         for k in examples.keys():
             ret_dict.setdefault(k, []).append(examples[k][i])
@@ -86,20 +98,26 @@ def map_fn_verification(examples):
     ret_dict = {}
     for i in range(len(examples['text'])):            
         curr_verification = examples['verification_raw'][i]
-        try:
-            extracted_vars = extract_variables(curr_verification)
-        except Exception:
-            extracted_vars = {}
-        
-        required_keys = ['Thoughts', 'Does verification?', 'Number of answer verification steps']
-        mapped_keys = ['thoughts_verification', 'is_verification', 'verification_count']
-        
-        if all(key in extracted_vars for key in required_keys):
-            for key, mapped_key in zip(required_keys, mapped_keys):
-                ret_dict.setdefault(mapped_key, []).append(extracted_vars[key])
+        count = re.findall(r'<count>(\d+)</count>', curr_verification)
+        if count:
+            count = int(count[0])
         else:
-            for mapped_key in mapped_keys:
-                ret_dict.setdefault(mapped_key, []).append(None)
+            count = None
+        ret_dict['verification_count'] = count
+        # try:
+        #     extracted_vars = extract_variables(curr_verification)
+        # except Exception:
+        #     extracted_vars = {}
+        
+        # required_keys = ['Thoughts', 'Does verification?', 'Number of answer verification steps']
+        # mapped_keys = ['thoughts_verification', 'is_verification', 'verification_count']
+        
+        # if all(key in extracted_vars for key in required_keys):
+        #     for key, mapped_key in zip(required_keys, mapped_keys):
+        #         ret_dict.setdefault(mapped_key, []).append(extracted_vars[key])
+        # else:
+        #     for mapped_key in mapped_keys:
+        #         ret_dict.setdefault(mapped_key, []).append(None)
         
         for k in examples.keys():
             ret_dict.setdefault(k, []).append(examples[k][i])
@@ -110,20 +128,27 @@ def map_fn_subgoal(examples):
     ret_dict = {}
     for i in range(len(examples['text'])):
         curr_subgoal = examples['subgoal_setting_raw'][i]
-        try:
-            extracted_vars = extract_variables(curr_subgoal)
-        except Exception:
-            extracted_vars = {}
-        
-        required_keys = ['Thoughts', 'Does subgoal setting?', 'Number of subgoal setting steps']
-        mapped_keys = ['thoughts_subgoal', 'is_subgoal', 'subgoal_count']
-        
-        if all(key in extracted_vars for key in required_keys):
-            for key, mapped_key in zip(required_keys, mapped_keys):
-                ret_dict.setdefault(mapped_key, []).append(extracted_vars[key])
+        # extract count using xml tags, regex <count>(\d+)</count>
+        count = re.findall(r'<count>(\d+)</count>', curr_subgoal)
+        if count:
+            count = int(count[0])
         else:
-            for mapped_key in mapped_keys:
-                ret_dict.setdefault(mapped_key, []).append(None)
+            count = None
+        ret_dict['subgoal_count'] = count
+        # try:
+        #     extracted_vars = extract_variables(curr_subgoal)
+        # except Exception:
+        #     extracted_vars = {}
+        
+        # required_keys = ['Thoughts', 'Does subgoal setting?', 'Number of subgoal setting steps']
+        # mapped_keys = ['thoughts_subgoal', 'is_subgoal', 'subgoal_count']
+        
+        # if all(key in extracted_vars for key in required_keys):
+        #     for key, mapped_key in zip(required_keys, mapped_keys):
+        #         ret_dict.setdefault(mapped_key, []).append(extracted_vars[key])
+        # else:
+        #     for mapped_key in mapped_keys:
+        #         ret_dict.setdefault(mapped_key, []).append(None)
         
         for k in examples.keys():
             ret_dict.setdefault(k, []).append(examples[k][i])
