@@ -40,4 +40,4 @@ all_ds_names = [
     
 all_ds = [datasets.load_dataset(ds_name, split='train') for ds_name in all_ds_names]
 all_ds = datasets.concatenate_datasets(all_ds)
-all_ds.push_to_hub('Asap7772/open_web_math_raw_v3_0_200000')
+all_ds.push_to_hub('obiwan96/open_web_math_raw_v3_0_200000')
