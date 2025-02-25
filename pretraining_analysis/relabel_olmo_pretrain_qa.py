@@ -125,14 +125,12 @@ Now do it for this text:""",
     'qa_none': """Your goal is to split the text into a question, thought and an answer.
 Make sure that the question is in the text. 
 Make sure that the answer and the process of the writer to get to the answer are in the text.
-Paraphrase the answer so that the answer is cleaned up. Make sure that the answer has the process of finding the solution.    
+Paraphrase the answer so that the answer is cleaned up. Make sure that the answer has the steps to find the solution.    
 Write the question in <question>...</question>.
 For the answer, split the answer into the process towards reaching the answer and the final answer.
-Write the process in <thoughts></thoughts> and the final answer in <answer>...</answer>.
-Use first person pronouns like "I" and "me" to refer to the author.
+Write the process in <thoughts>steps to find the solution</thoughts> and the final answer in <answer>...</answer>.
 
 Now do it for this text:""",
-
 }
 
     if args.dataset_name == 'finemath':

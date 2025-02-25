@@ -71,7 +71,8 @@ def main(args):
     if args.only_subgoal:
         ds = datasets.load_dataset('Asap7772/open_web_math_raw_0_1000000', num_proc=os.cpu_count()-2, split=args.split)
     else:
-        ds = datasets.load_dataset('open-web-math/open-web-math', num_proc=os.cpu_count()-2, split=args.split)
+        # ds = datasets.load_dataset('open-web-math/open-web-math', num_proc=os.cpu_count()-2, split=args.split)
+        ds = datasets.load_dataset('HuggingFaceTB/finemath', num_proc=os.cpu_count()-2, split=args.split)
         
     if args.max_examples > 0:
         ds = ds.select(range(args.max_examples))
@@ -155,7 +156,7 @@ def main(args):
                 suffix = ''
             if args.only_subgoal:
                 suffix += '_subgoal'
-            ds_out_name = f'{args.user}open_web_math_raw_v3{suffix}'
+            ds_out_name = f'{args.user}finemath_raw_v3{suffix}'
             ds_so_far.push_to_hub(ds_out_name)
         except Exception as e:
             print(f'Error saving dataset: {e}')
@@ -169,7 +170,7 @@ def main(args):
             suffix = ''
         if args.only_subgoal:
             suffix += '_subgoal'
-        ds_out_name = f'{args.user}open_web_math_raw_v3{suffix}'
+        ds_out_name = f'{args.user}finemath_raw_v3{suffix}'
         ds_so_far.push_to_hub(ds_out_name)
     except Exception as e:
         print(f'Final error saving dataset: {e}')
