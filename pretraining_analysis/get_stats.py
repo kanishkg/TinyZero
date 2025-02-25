@@ -37,10 +37,10 @@ print(f'verification_count_gt_0: {verification_count_gt_0} ({verification_count_
 print(f'subgoal_count_gt_0: {subgoal_count_gt_0} ({subgoal_count_gt_0 / num_samples * 100}%)')
 
 # get average counts
-backtrack_count_avg = sum(backtrack_count) / num_samples
-backchain_count_avg = sum(backchain_count) / num_samples
-verification_count_avg = sum(verification_count) / num_samples
-subgoal_count_avg = sum(subgoal_count) / num_samples
+backtrack_count_avg = sum(backtrack_non_none) / len(num_samples)
+backchain_count_avg = sum(backchain_non_none) / len(num_samples)
+verification_count_avg = sum(verification_non_none) / len(num_samples)
+subgoal_count_avg = sum(subgoal_non_none) / len(num_samples)
 
 print(f'backtrack_count_avg: {backtrack_count_avg}')
 print(f'backchain_count_avg: {backchain_count_avg}')
