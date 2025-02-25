@@ -50,7 +50,7 @@ Let me see if I can solve this step by step.
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--local_dir', default='~/ba/data/big_math')
+    parser.add_argument('--local_dir', default='~/big_math')
     parser.add_argument('--hdfs_dir', default=None)
     parser.add_argument('--template_type', type=str, default='base')
 
