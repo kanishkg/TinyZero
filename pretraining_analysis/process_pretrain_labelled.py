@@ -40,7 +40,7 @@ def map_fn_backtrack(examples):
             count = int(count[0])
         else:
             count = None
-        ret_dict['backtrack_count'] = count
+        ret_dict.setdefault('backtrack_count', []).append(count)
         # try:
         #     extracted_vars = extract_variables(curr_backtrack)
         # except Exception:
@@ -73,7 +73,7 @@ def map_fn_backchain(examples):
             count = int(count[0])
         else:
             count = None
-        ret_dict['backchain_count'] = count
+        ret_dict.setdefault('backchain_count', []).append(count)
         # try:
         #     extracted_vars = extract_variables(curr_backchain)
         # except Exception:
@@ -103,7 +103,7 @@ def map_fn_verification(examples):
             count = int(count[0])
         else:
             count = None
-        ret_dict['verification_count'] = count
+        ret_dict.setdefault('verification_count', []).append(count)
         # try:
         #     extracted_vars = extract_variables(curr_verification)
         # except Exception:
@@ -134,7 +134,7 @@ def map_fn_subgoal(examples):
             count = int(count[0])
         else:
             count = None
-        ret_dict['subgoal_count'] = count
+        ret_dict.setdefault('subgoal_count', []).append(count)
         # try:
         #     extracted_vars = extract_variables(curr_subgoal)
         # except Exception:
