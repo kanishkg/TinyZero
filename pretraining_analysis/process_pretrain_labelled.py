@@ -139,7 +139,7 @@ ds = ds.map(map_fn_backchain, batched=True, remove_columns=ds.column_names, num_
 ds = ds.map(map_fn_verification, batched=True, remove_columns=ds.column_names, num_proc=os.cpu_count())
 ds = ds.map(map_fn_subgoal, batched=True, remove_columns=ds.column_names, num_proc=os.cpu_count())
 
-ds.push_to_hub('obiwan96/obiwan96open_web_math_raw_v3_0_200000_processed')
+ds.push_to_hub('obiwan96/open_web_math_raw_v3_0_200000_processed')
 
 
 
