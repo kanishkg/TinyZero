@@ -84,7 +84,7 @@ def main(args):
     llm = LLM(
         model='Qwen/Qwen2.5-32B-Instruct',
         tokenizer_mode="auto",
-        max_num_seqs=64,
+        max_num_seqs=32,
         enable_prefix_caching=True,
         trust_remote_code=True,
         tensor_parallel_size=2,
