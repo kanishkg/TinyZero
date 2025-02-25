@@ -14,13 +14,11 @@ Count the number of distinct backward-chaining instances and provide the count b
 # Task Format
 Format your response in markdown as follows:
 
+## Thoughts
+[Brief description of the observed behavior and where backward chaining may have occurred]
+
 ## Does the text exhibit backward chaining?
 [yes/no]
-
-## Rationale
-<think>
-[Brief description of the observed behavior and where backward chaining may have occurred]
-</think>
 
 ## Number of backward chaining instances
 <count> [1/2/...] </count>

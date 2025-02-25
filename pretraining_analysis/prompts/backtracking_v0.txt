@@ -13,13 +13,11 @@ Count the number of distinct backtracking instances and provide the count betwee
 # Task Format
 Format your response in markdown as follows:
 
+## Thoughts
+[Brief description describing what behavior was noticed and where backtracking occurred]
+
 ## Does backtrack?
 [yes/no]
-
-## Rationale
-<think>
-[Brief description describing what behavior was noticed and where backtracking occurred]
-</think>
 
 ## Number of backtrack steps
 <count> [1/2/...] </count>
