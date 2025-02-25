@@ -9,7 +9,7 @@ import re
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--dataset_name', type=str, default='finemath', help='Dataset name')
+parser.add_argument('--dataset_name', type=str, default='openwebmath_backtrack', help='Dataset name')
 parser.add_argument('--start', type=int, default=-1, help='Shard to process')
 parser.add_argument('--end', type=int, default=-1, help='Number of shards to process')
 parser.add_argument('--split', type=str, default='train', help='Split to process')
@@ -123,11 +123,9 @@ Use about 500 words for the thoughts section.
 Now do it for this text:""",
 
     'qa_none': """Your goal is to split the text into a question, thought and an answer.
-Make sure that the question is in the text. 
-Make sure that the answer and the process of the writer to get to the answer are in the text.
-Paraphrase the answer so that the answer is cleaned up. Make sure that the answer has the steps to find the solution.    
+Make sure that the question, thoughts and answer are in the text. 
+Paraphrase the answer so that the answer is cleaned up. Make sure that the answer has steps to find the solution.    
 Write the question in <question>...</question>.
-For the answer, split the answer into the process towards reaching the answer and the final answer.
 Write the process in <thoughts>steps to find the solution</thoughts> and the final answer in <answer>...</answer>.
 
 Now do it for this text:""",
@@ -136,7 +134,7 @@ Now do it for this text:""",
     if args.dataset_name == 'finemath':
         ds = datasets.load_dataset("HuggingFaceTB/finemath", "finemath-4plus", split=args.split, num_proc=os.cpu_count()-2)
     elif args.dataset_name == 'openwebmath':
-        ds = datasets.load_dataset('Asap7772/open-web-math-processed-v2', num_proc=os.cpu_count()-2, split=args.split)
+        ds = datasets.load_dataset('Asap7772/open-web-math-none-processed-v2', num_proc=os.cpu_count()-2, split=args.split)
     elif args.dataset_name == 'openwebmath_backtrack':
         ds = datasets.load_dataset('Asap7772/open-web-math-backtrack-processed-v2', num_proc=os.cpu_count()-2, split=args.split)
     else:
