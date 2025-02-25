@@ -137,6 +137,8 @@ Now do it for this text:""",
         ds = datasets.load_dataset("HuggingFaceTB/finemath", "finemath-4plus", split=args.split, num_proc=os.cpu_count()-2)
     elif args.dataset_name == 'openwebmath':
         ds = datasets.load_dataset('Asap7772/open-web-math-processed-v2', num_proc=os.cpu_count()-2, split=args.split)
+    elif args.dataset_name == 'openwebmath_backtrack':
+        ds = datasets.load_dataset('Asap7772/open-web-math-backtrack-processed-v2', num_proc=os.cpu_count()-2, split=args.split)
     else:
         raise ValueError(f"Unknown dataset name: {args.dataset_name}")
         
@@ -148,7 +150,7 @@ Now do it for this text:""",
         ds = ds.select(range(args.start, args.end))
     
     # filter examples where 'contain_problem' is no or 'contain_solution' is no
-    if args.dataset_name == 'openwebmath':
+    if args.dataset_name == 'openwebmath' or args.dataset_name == 'openwebmath_backtrack':
         ds = ds.filter(lambda x: x['contain_problem'] != 'no' and x['contain_solution'] != 'no')
         print(f"Number of examples after filtering: {len(ds)}")
 
@@ -205,7 +207,7 @@ Now do it for this text:""",
                 suffix = f'_{args.start}_{args.end}'
             else:
                 suffix = ''
-            ds_out_name = f'{args.user}open_web_math_qav3{suffix}'
+            ds_out_name = f'{args.user}open_web_math_backtrack_40k_{suffix}'
             ds_so_far.push_to_hub(ds_out_name)
         except Exception as e:
             print(f'Error saving dataset: {e}')
@@ -217,7 +219,7 @@ Now do it for this text:""",
             suffix = f'_{args.start}_{args.end}'
         else:
             suffix = ''
-        ds_out_name = f'{args.user}open_web_math_qav3{suffix}'
+        ds_out_name = f'{args.user}open_web_math_backtrack_40k_{suffix}'
         ds_so_far.push_to_hub(ds_out_name)
     except Exception as e:
         print(f'Final error saving dataset: {e}')

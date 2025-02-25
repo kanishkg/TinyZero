@@ -9,7 +9,7 @@ def main():
                         help='Starting shard index (inclusive)')
     parser.add_argument('--end', type=int, default=100000,
                         help='Ending shard index (exclusive)')
-    parser.add_argument('--num_nodes', type=int, default=2,
+    parser.add_argument('--num_nodes', type=int, default=1,
                         help='Total number of nodes to use')
     parser.add_argument('--node', type=int, default=0,
                         help='Index of the current node (0-indexed)')

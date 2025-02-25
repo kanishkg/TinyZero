@@ -7,9 +7,13 @@ export WANDB_API_KEY=a393f29dee9351c0a8c4e410e626e20733564d26
 export WANDB_USERNAME=gurpreetkaur94539
 export WANDB_USER_EMAIL=gurpreetkaur94539gmail.com
 export WANDB__SERVICE_WAIT=300
-export WANDB_ENTITY=cocolab
+# export WANDB_ENTITY=cocolab
 export HF_DATASETS_CACHE=$hf_cache_dir
 export HF_TOKEN='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'
+
+base_data_paths=(
+  /home/anikait.singh/rl_behaviors/cot_datasets/rag_ai2_sft
+)
 
 # List of dataset conditions
 conditions=(
@@ -17,20 +21,18 @@ conditions=(
 )
 
 model_names=(
-  meta-llama/Llama-3.2-3B
+  Qwen/Qwen2.5-3B
 )
 
 epochs=(
-  2
+  5
+  10
 )
 
 lrs=(
   1e-5
   1e-6
 )
-
-# Base path for dataset files
-base_data_path="/home/anikait.singh/rl_behaviors/cot_datasets/data_math_qv3"
 
 # Shared training parameters
 prompt_key="query"
@@ -41,10 +43,10 @@ train_batch_size=80
 max_length=4096
 default_hdfs_dir="/home/anikait.singh/rl_behaviors/hdfs"
 default_local_dir="/home/anikait.singh/rl_behaviors/sft"
-project_name="math-pretraineddata-sft-0223"
+project_name="math-ragai2-sft-0223"
 logger="['console','wandb']"
-warmup_steps_ratio=0.01
-weight_decay=0.01
+warmup_steps_ratio=0.05
+weight_decay=1e-4
 
 exp_num=0
 dry_run=false
@@ -53,6 +55,7 @@ if [ $which_exp -eq -1 ]; then
     echo "Running all experiments" 
 fi
 # Iterate over each condition and launch a training job
+for base_data_path in "${base_data_paths[@]}"; do
 for model_name in "${model_names[@]}"; do
 for condition in "${conditions[@]}"; do
 for total_epochs in "${epochs[@]}"; do
@@ -66,7 +69,8 @@ for lr in "${lrs[@]}"; do
   val_file="${base_data_path}/${condition}/test.parquet"
 
   model_name_short=$(echo $model_name | cut -d'/' -f2)
-  experiment_name="math-pretraineddata-sft-${model_name_short}-${condition}-epochs${total_epochs}-lr${lr}-exp${exp_num}"
+  data_path_short=$(echo $base_data_path | cut -d'/' -f6)
+  experiment_name="sft-${model_name_short}-${data_path_short}-${condition}-${total_epochs}-${lr}-exp${exp_num}"
   # save_dir="${default_local_dir}/${model_name_short}/${condition}/${total_epochs}/${lr}/${exp_num}"
   save_dir="${default_local_dir}/${experiment_name}"
   mkdir -p $save_dir
@@ -77,7 +81,7 @@ for lr in "${lrs[@]}"; do
   echo "Experiment name: ${experiment_name}"
   echo ""
 
-  torchrun --nproc_per_node=8 -m verl.trainer.fsdp_sft_trainer \
+  command="torchrun --nproc_per_node=8 -m verl.trainer.fsdp_sft_trainer \
     data.train_files="${train_file}" \
     data.val_files="${val_file}" \
     data.prompt_key="${prompt_key}" \
@@ -95,10 +99,18 @@ for lr in "${lrs[@]}"; do
     trainer.logger="${logger}" \
     optim.lr="${lr}" \
     optim.warmup_steps_ratio=$warmup_steps_ratio \
-    optim.weight_decay=$weight_decay
+    optim.weight_decay=$weight_decay \
+  "
+  echo $command
   echo "--------------------------------------------------"
 
+
+  if [ "$dry_run" = false ]; then
+    eval $command
+  fi
+
   exp_num=$((exp_num+1))
+done
 done
 done
 done

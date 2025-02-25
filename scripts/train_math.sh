@@ -39,7 +39,7 @@ python3 -m verl.trainer.main_ppo \
    trainer.nnodes=1 \
    trainer.save_freq=100 \
    trainer.test_freq=100 \
-   trainer.project_name=behavior_amplification_math \
+   trainer.project_name=behavior_amplification_math_hint \
    trainer.experiment_name=$EXPERIMENT_NAME \
    trainer.save_freq=5 \
    trainer.test_freq=10 \
