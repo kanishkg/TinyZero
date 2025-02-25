@@ -109,7 +109,7 @@ def map_fn_verification(examples):
 def map_fn_subgoal(examples):
     ret_dict = {}
     for i in range(len(examples['text'])):
-        curr_subgoal = examples['subgoal_raw'][i]
+        curr_subgoal = examples['subgoal_setting_raw'][i]
         try:
             extracted_vars = extract_variables(curr_subgoal)
         except Exception:
