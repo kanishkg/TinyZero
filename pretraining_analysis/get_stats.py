@@ -22,10 +22,14 @@ print(f'verification_count_none: {verification_count_none} ({verification_count_
 print(f'subgoal_count_none: {subgoal_count_none} ({subgoal_count_none / num_samples * 100}%)')
 
 # get number of samples with counts greater than 0
-backtrack_count_gt_0 = sum(1 for count in backtrack_count if count > 0)
-backchain_count_gt_0 = sum(1 for count in backchain_count if count > 0)
-verification_count_gt_0 = sum(1 for count in verification_count if count > 0)
-subgoal_count_gt_0 = sum(1 for count in subgoal_count if count > 0)
+backtrack_non_none = [count for count in backtrack_count if count is not None]
+backtrack_count_gt_0 = sum(1 for count in backtrack_non_none if count > 0)
+backchain_non_none = [count for count in backchain_count if count is not None]
+backchain_count_gt_0 = sum(1 for count in backchain_non_none if count > 0)
+verification_non_none = [count for count in verification_count if count is not None]
+verification_count_gt_0 = sum(1 for count in verification_non_none if count > 0)
+subgoal_non_none = [count for count in subgoal_count if count is not None]
+subgoal_count_gt_0 = sum(1 for count in subgoal_non_none if count > 0)
 
 print(f'backtrack_count_gt_0: {backtrack_count_gt_0} ({backtrack_count_gt_0 / num_samples * 100}%)')
 print(f'backchain_count_gt_0: {backchain_count_gt_0} ({backchain_count_gt_0 / num_samples * 100}%)')
