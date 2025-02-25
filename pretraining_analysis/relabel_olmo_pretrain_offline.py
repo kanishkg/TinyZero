@@ -18,7 +18,6 @@ parser.add_argument('--only_subgoal', action='store_true', help='Only generate s
 
 PROMPT_LOC_DICT = {
     'backtracking': './pretraining_analysis/prompts/backtracking_v0.txt',
-    'is_solution': './pretraining_analysis/prompts/is_solution_v0.txt',
     'verification': './pretraining_analysis/prompts/verification_v0.txt',
     'subgoal_setting': './pretraining_analysis/prompts/subgoal_setting_v0.txt',
     'backward_chaining': './pretraining_analysis/prompts/backward_chaining_v0.txt',
@@ -46,15 +45,13 @@ def get_prompts(ds, tokenizer, prompt_templates):
             continue
         backtracking_prompt = prompt_templates['backtracking'].format(response=example)
         backtracking_prompt = [{'role': 'user', 'content': backtracking_prompt}]
-        is_solution_prompt = prompt_templates['is_solution'].format(response=example)
-        is_solution_prompt = [{'role': 'user', 'content': is_solution_prompt}]
         verification_prompt = prompt_templates['verification'].format(response=example)
         verification_prompt = [{'role': 'user', 'content': verification_prompt}]
         subgoal_setting_prompt = prompt_templates['subgoal_setting'].format(response=example)
         subgoal_setting_prompt = [{'role': 'user', 'content': subgoal_setting_prompt}]
         backward_chaining_prompt = prompt_templates['backward_chaining'].format(response=example)
         backward_chaining_prompt = [{'role': 'user', 'content': backward_chaining_prompt}]
-        prompts += [backtracking_prompt, is_solution_prompt, verification_prompt, subgoal_setting_prompt, backward_chaining_prompt]
+        prompts += [backtracking_prompt, verification_prompt, subgoal_setting_prompt, backward_chaining_prompt]
     new_prompts = [tokenizer.apply_chat_template(
         p,
         tokenize=False,
@@ -83,16 +80,16 @@ def main(args):
         print('Subsampling the dataset with start={} and end={}'.format(args.start, args.end))
         ds = ds.select(range(args.start, args.end))
     llm = LLM(
-        model='meta-llama/Llama-3.3-70B-Instruct',
+        model='Qwen/Qwen2.5-32B-Instruct',
         tokenizer_mode="auto",
-        max_num_seqs=32,
+        max_num_seqs=64,
         enable_prefix_caching=True,
         trust_remote_code=True,
         tensor_parallel_size=2,
         gpu_memory_utilization=0.95,
         max_model_len=4096,
     )
-    tokenizer = AutoTokenizer.from_pretrained("meta-llama/Llama-3.3-70B-Instruct")
+    tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen2.5-32B-Instruct")
 
     num_batches = math.ceil(len(ds) / args.save_every)
     batch_size = args.save_every
@@ -118,7 +115,6 @@ def main(args):
         else:
             outputs_dict = {
                 'backtracking_raw': [None] * len(curr_batch),
-                'is_solution_raw': [None] * len(curr_batch),
                 'verification_raw': [None] * len(curr_batch),
                 'subgoal_setting_raw': [None] * len(curr_batch),
                 'backward_chaining_raw': [None] * len(curr_batch)
@@ -129,24 +125,21 @@ def main(args):
             if args.only_subgoal:
                 outputs_dict['subgoal_setting_raw'][i] = output
                 continue
-            idx = i % 5
-            batch_idx = i // 5
+            idx = i % 4
+            batch_idx = i // 4
             if idx == 0:
                 outputs_dict['backtracking_raw'][batch_idx] = output
             elif idx == 1:
-                outputs_dict['is_solution_raw'][batch_idx] = output
-            elif idx == 2:
                 outputs_dict['verification_raw'][batch_idx] = output
-            elif idx == 3:
+            elif idx == 2:
                 outputs_dict['subgoal_setting_raw'][batch_idx] = output
-            elif idx == 4:
+            elif idx == 3:
                 outputs_dict['backward_chaining_raw'][batch_idx] = output
 
         if args.only_subgoal:
             curr_batch = curr_batch.add_column('subgoal_setting_relabeled', outputs_dict['subgoal_setting_raw'])
         else:
             curr_batch = curr_batch.add_column('backtracking_raw', outputs_dict['backtracking_raw'])
-            curr_batch = curr_batch.add_column('is_solution_raw', outputs_dict['is_solution_raw'])
             curr_batch = curr_batch.add_column('verification_raw', outputs_dict['verification_raw'])
             curr_batch = curr_batch.add_column('subgoal_setting_raw', outputs_dict['subgoal_setting_raw'])
             curr_batch = curr_batch.add_column('backward_chaining_raw', outputs_dict['backward_chaining_raw'])
