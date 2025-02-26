@@ -109,6 +109,17 @@ for i, l in enumerate(lens):
 ds = ds.select(keep_idx)
 print(f"Kept {len(keep_idx)} examples with total {cumsum} tokens")
 
+train_completion = ds['completion']
+tokenizer = AutoTokenizer.from_pretrained('meta-llama/Llama-3.1-8B')
+tokens = tokenizer(train_completion)
+lens = [len(t) for t in tokens['input_ids']]
+print(f"Max length: {max(lens)}")
+print(f"Min length: {min(lens)}")
+print(f"Mean length: {np.mean(lens)}")
+print(f"Median length: {np.median(lens)}")
+print(f"Total tokens: {sum(lens)}")
+print(f"Number of completions: {len(lens)}")
+
 ds_out_name = 'obiwan96/obiwan96open_web_math_qav3'
 ds = ds.train_test_split(test_size=0.05)
 ds.push_to_hub(ds_out_name)
