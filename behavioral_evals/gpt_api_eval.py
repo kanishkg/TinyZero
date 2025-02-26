@@ -8,35 +8,13 @@ import random
 import re
 import fcntl
 
-class CountdownAnalyzer:
+class BaseAnalyzer:
     def __init__(self, api_key=None):
         self.client = OpenAI(api_key=api_key)
-
+    
     def create_analysis_prompts(self, numbers, target, completion):
-        """Create the four different analysis prompts for a given problem."""
-        prompts = [
-            # 1. Answer-verification steps
-            f"""Here is a chain-of-reasoning that a Language Model generated while trying to play the game of CountDown with the numbers {numbers}. The goal is to reach the target number {target}. The chain-of-reasoning the model used is: {completion}. 
-Evaluate whether the chain-of-reasoning contains any answer-verification steps. An example of an answer-verification step is: 'This sequence results in 1, which is not equal to 22' and 'Since 25 is not equal to 22' for explicit verification and 'Too high!' or 'This works!' for implicit verification. We want to mark instances where the chain-of-reasoning explicitly checks the current result against the target number. 
-If you find any answer-verification steps, please count them and provide the count as between the tags <count> </count>. If the chain-of-reasoning does not contain any answer-verification steps, please provide a count of 0 as <count>0</count>.""",
-
-            # 2. Backtracking behavior
-            f"""Here is a chain-of-reasoning that a Language Model generated while trying to play the game of CountDown with the numbers {numbers}. The goal is to reach the target number {target}. The chain-of-reasoning the model used is: {completion}.
-Evaluate whether the chain-of-reasoning contains any backtracking behavior, where the model realizes a path won't work and explicitly goes back to try a different approach. Due to the nature of the problem, any attempt at a new combination of numbers that does not directly use the result from the previous computation is considered backtracking. 
-For example, in the reasoning trace with numbers [20, 7, 11, 78] - "(78 - 20) - (11 - 7) = 58 - 4 = 54, (54 - 78) + 11 = -24 + 11 = -13, (-13 + 78) - 11 = 65 - 11 = 54, (78 - 58) + 11 = 20 + 11 = 31, (78 - 58) + (20 - 11) = 20 + 9 = 29, (78 - 20) + (11 - 7) = 58 + 4 = 62, (78 - 11) - (20 - 7) = 67 - 13 = 54, (78 - 20) + (11 / 7) = 58 + 1.5714 = 59.5714, (78 - 11) / (20 - 7) = 67 / 13 = 5, (78 - 20) + (11 + 7) = 58", there are 5 instances of backtracking to the initial numbers.
-Count the number of distinct backtracking instances and provide the count between the tags <count> </count>. If the chain-of-reasoning does not contain any backtracking behavior, please provide a count of 0 as <count>0</count>.""",
-
-            # 3. Subgoal setting
-            f"""Here is a chain-of-reasoning that a Language Model generated while trying to play the game of CountDown with the numbers {numbers}. The goal is to reach the target number {target}. The chain-of-reasoning the model used is: {completion}.
-Evaluate whether the chain-of-reasoning contains any explicit subgoal setting, where the model breaks down the problem into smaller, intermediate goals. An example of subgoal setting is: "First, I'll try to get close to {target//2}, then...".
-Count the number of distinct subgoals set and provide the count between the tags <count> </count>. If the chain-of-reasoning does not contain any subgoal setting, please provide a count of 0 as <count>0</count>.""",
-
-            # 4. Backward-chaining
-            f"""Here is a chain-of-reasoning that a Language Model generated while trying to play the game of CountDown with the numbers {numbers}. The goal is to reach the target number {target}. The chain-of-reasoning the model used is: {completion}.
-Evaluate whether the chain-of-reasoning contains any backward-chaining behavior, where the model starts from the target number and works backwards to the initial numbers. An example of backward-chaining when the target is 24 and the numbers are 12 and 2 is: "Let's work backwards from the target. 24/2 = 12. So, 12*2=24." and if the target is 22 and the numbers are 25 and 3 is: "Since the target is 22, and 22 + 3 = 25, ...".
-Count the number of distinct backward-chaining instances and provide the count between the tags <count> </count>. If the chain-of-reasoning does not contain any backward-chaining behavior, please provide a count of 0 as <count>0</count>."""
-        ]
-        return prompts
+        """Create the analysis prompts for a given problem."""
+        pass
 
     def convert_to_batch_format(self, input_path, num_samples=200):
         """
@@ -327,6 +305,97 @@ Count the number of distinct backward-chaining instances and provide the count b
         print("\nProcessing complete!")
         return problem_metrics
 
+
+class CountdownAnalyzer(BaseAnalyzer):
+    def __init__(self, api_key=None):
+        super().__init__(api_key=api_key)
+
+    def create_analysis_prompts(self, numbers, target, completion):
+        prompts = [
+            # 1. Answer-verification steps
+            f"""Here is a chain-of-reasoning that a Language Model generated while trying to play the game of CountDown with the numbers {numbers}. The goal is to reach the target number {target}. The chain-of-reasoning the model used is: {completion}. 
+Evaluate whether the chain-of-reasoning contains any answer-verification steps. An example of an answer-verification step is: 'This sequence results in 1, which is not equal to 22' and 'Since 25 is not equal to 22' for explicit verification and 'Too high!' or 'This works!' for implicit verification. We want to mark instances where the chain-of-reasoning explicitly checks the current result against the target number. 
+If you find any answer-verification steps, please count them and provide the count as between the tags <count> </count>. If the chain-of-reasoning does not contain any answer-verification steps, please provide a count of 0 as <count>0</count>.""",
+
+            # 2. Backtracking behavior
+            f"""Here is a chain-of-reasoning that a Language Model generated while trying to play the game of CountDown with the numbers {numbers}. The goal is to reach the target number {target}. The chain-of-reasoning the model used is: {completion}.
+Evaluate whether the chain-of-reasoning contains any backtracking behavior, where the model realizes a path won't work and explicitly goes back to try a different approach. Due to the nature of the problem, any attempt at a new combination of numbers that does not directly use the result from the previous computation is considered backtracking. 
+For example, in the reasoning trace with numbers [20, 7, 11, 78] - "(78 - 20) - (11 - 7) = 58 - 4 = 54, (54 - 78) + 11 = -24 + 11 = -13, (-13 + 78) - 11 = 65 - 11 = 54, (78 - 58) + 11 = 20 + 11 = 31, (78 - 58) + (20 - 11) = 20 + 9 = 29, (78 - 20) + (11 - 7) = 58 + 4 = 62, (78 - 11) - (20 - 7) = 67 - 13 = 54, (78 - 20) + (11 / 7) = 58 + 1.5714 = 59.5714, (78 - 11) / (20 - 7) = 67 / 13 = 5, (78 - 20) + (11 + 7) = 58", there are 5 instances of backtracking to the initial numbers.
+Count the number of distinct backtracking instances and provide the count between the tags <count> </count>. If the chain-of-reasoning does not contain any backtracking behavior, please provide a count of 0 as <count>0</count>.""",
+
+            # 3. Subgoal setting
+            f"""Here is a chain-of-reasoning that a Language Model generated while trying to play the game of CountDown with the numbers {numbers}. The goal is to reach the target number {target}. The chain-of-reasoning the model used is: {completion}.
+Evaluate whether the chain-of-reasoning contains any explicit subgoal setting, where the model breaks down the problem into smaller, intermediate goals. An example of subgoal setting is: "First, I'll try to get close to {target//2}, then...".
+Count the number of distinct subgoals set and provide the count between the tags <count> </count>. If the chain-of-reasoning does not contain any subgoal setting, please provide a count of 0 as <count>0</count>.""",
+
+            # 4. Backward-chaining
+            f"""Here is a chain-of-reasoning that a Language Model generated while trying to play the game of CountDown with the numbers {numbers}. The goal is to reach the target number {target}. The chain-of-reasoning the model used is: {completion}.
+Evaluate whether the chain-of-reasoning contains any backward-chaining behavior, where the model starts from the target number and works backwards to the initial numbers. An example of backward-chaining when the target is 24 and the numbers are 12 and 2 is: "Let's work backwards from the target. 24/2 = 12. So, 12*2=24." and if the target is 22 and the numbers are 25 and 3 is: "Since the target is 22, and 22 + 3 = 25, ...".
+Count the number of distinct backward-chaining instances and provide the count between the tags <count> </count>. If the chain-of-reasoning does not contain any backward-chaining behavior, please provide a count of 0 as <count>0</count>."""
+        ]
+        return prompts
+
+class MathAnalyzer(BaseAnalyzer):
+    def __init__(self, api_key=None):
+        super().__init__(api_key=api_key)
+    
+    def create_analysis_prompts(self, completion):
+        prompts = [
+            # 1. Answer-verification steps
+            f"""You will be provided with text from the internet. 
+Evaluate whether the text contains any verification steps. We want to mark instances where the writer explicitly checks their own work, such as by comparing the result to a known value or by checking the result of a calculation.
+The text to evaluate for verification steps is: {completion}. 
+Verification steps in mathematics might look like:
+- "Let's check our answer by substituting x = 3 back into the original equation."
+- "To verify this is correct, I'll differentiate the antiderivative and confirm it matches the original function."
+- "Let's test our formula with a simple case: when n = 1, we get f(1) = 2, which matches our expected result."
+- "To ensure this solution is valid, I'll check if it satisfies all the given constraints."
+
+If you find any verification steps, please count them and provide the count as between the tags <count> </count>. If the text does not contain any verification steps, please provide a count of 0 as <count>0</count>.""",
+
+        # 2. Backtracking behavior
+        f"""You will be provided with text from the internet.
+Evaluate whether the text contains any backtracking behavior, where the writer realizes a path won't work and explicitly goes back to try a different approach. An example of backtracking is: "Let me try again", "Wait", "I made a mistake", or "we need to try a different sequence of operations". We want to mark instances where the writer abandons a thought and backtracks to a previous computation.
+The text to evaluate for backtracking is: {completion}.
+Backtracking in mathematics might look like:
+- "I started with the wrong formula. Let's use integration by parts instead."
+- "This approach leads to a contradiction. Going back to the original equation..."
+- "I see the error in my calculation. Let's recalculate using..."
+- "This algebraic manipulation isn't simplifying as expected. Let's try factoring differently."
+
+If you find any backtracking instances, please count them and provide the count as between the tags <count> </count>. If the text does not contain any backtracking behavior, please provide a count of 0 as <count>0</count>.""",
+
+        # 3. Subgoal setting
+        f"""You will be provided with text from the internet.
+Evaluate whether the text contains any explicit subgoal setting, where the writer breaks down the problem into smaller, intermediate goals.
+The text to evaluate for subgoal setting is: {completion}.
+Subgoal setting in mathematics might look like:
+- "First, we need to find the derivative of f(x), then we can determine where it equals zero."
+- "To solve this system of equations, let's first isolate x in the first equation, then substitute it into the second."
+- "Let's tackle this proof in three parts: (1) prove for the base case, (2) establish the induction hypothesis, and (3) prove the inductive step."
+- "To calculate this integral, I'll first use substitution to simplify, then apply the power rule."
+
+If you find any distinct subgoals set, please count them and provide the count between the tags <count> </count>. If the text does not contain any subgoal setting, please provide a count of 0 as <count>0</count>.""",
+
+        # 4. Backward-chaining
+        f"""You will be provided with text from the internet.
+Evaluate whether the text contains any backward-chaining behavior, where the writer is working towards a goal but starts from the goal and works backward.
+The text to evaluate for backward-chaining is: {completion}.
+Backward-chaining in mathematics might look like:
+- "To solve this equation, let's start with what we want to prove: x = 4. Working backward, if x = 4, then x² - 5x + 4 = 0 must be true. Let's verify this."
+- "If we want to find a function whose derivative is 2x + 3, let's start with the desired result and work backward. The derivative of x² + 3x + C would give us 2x + 3."
+- "To prove this triangle is a right triangle, I'll start by assuming the Pythagorean theorem holds (c² = a² + b²) and check if our side lengths satisfy this condition."
+- "In this optimization problem, we know the maximum value occurs when the derivative equals zero. If we set f'(x) = 0 and solve for x, we can find our critical points."
+- "To determine the initial velocity, I know the ball reaches a height of 20 meters. Working backward from this final state using the kinematic equation h = vt - 0.5gt², I can solve for the initial velocity v."
+
+Count the number of distinct backward-chaining instances and provide the count between the tags `<count></count>`. If the reasoning does not contain any backward-chaining behavior, provide a count of 0 as <count>0</count>.""",
+        ]
+
+        return prompts
+
+
+    
+
 async def main():
     parser = argparse.ArgumentParser(description='Process countdown problems using OpenAI Batch API')
     parser.add_argument('--input', '-i', 
@@ -346,9 +415,13 @@ async def main():
                         choices=['batch', 'sync'],
                         default='batch',
                         help='API mode: batch (default) or sync for synchronous processing')
+    parser.add_argument('--task-type', '-t',
+                        choices=['countdown', 'math'],
+                        default='countdown',
+                        help='The type of task to process')
     args = parser.parse_args()
     
-    analyzer = CountdownAnalyzer(args.api_key or os.getenv('OPENAI_API_KEY'))
+    analyzer = CountdownAnalyzer(args.api_key or os.getenv('OPENAI_API_KEY')) if args.task_type == 'countdown' else MathAnalyzer(args.api_key or os.getenv('OPENAI_API_KEY'))
     
     try:
         if args.mode == 'batch':
@@ -383,7 +456,7 @@ async def main():
             }
             os.makedirs(args.output_dir, exist_ok=True)
             # For synchronous mode, we use a fixed step value of 1.
-            detailed_path = os.path.join(args.output_dir, f"evaluation_step1.json")
+            detailed_path = os.path.join(args.output_dir, "evaluation_step1.json")
             with open(detailed_path, 'w') as f:
                 json.dump({
                     'results': list(problem_metrics.values()),

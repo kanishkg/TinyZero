@@ -6,7 +6,8 @@ import re
 import gc
 from vllm import LLM, SamplingParams
 from datasets import load_dataset
-from verl.utils.reward_score.countdown import compute_score
+from verl.utils.reward_score.countdown import compute_score as compute_score_countdown
+from verl.utils.reward_score.math import compute_score as compute_score_math
 from tqdm import tqdm
 
 os.environ["VLLM_WORKER_MULTIPROC_METHOD"] = "spawn"
@@ -23,7 +24,7 @@ def main():
     parser.add_argument(
         "--dataset",
         type=str,
-        required=True,
+        required=True,     
     )
     parser.add_argument(
         "--temperature",
@@ -41,6 +42,15 @@ def main():
         default=1024
     )
 
+    parser.add_argument(
+        "--task-type",
+        type=str,
+        options=["countdown", "math"],
+        required=True,
+        help="The type of task the model was trained on."
+    )
+
+
     args = parser.parse_args()
     ckpt_dir = args.ckpt
     dataset_path = args.dataset
@@ -48,7 +58,7 @@ def main():
     dataset = dataset.select(range(args.num_samples))
 
     sampling_params = SamplingParams(
-        max_tokens=1024,
+        max_tokens=1024 if args.task_type == "countdown" else 2048,
         temperature=args.temperature,
     )
 
@@ -90,8 +100,13 @@ def main():
         results = []
         for index, (prompt, ground_truth, response) in enumerate(zip(prompts, ground_truths, responses)):
             generated_text = response.outputs[0].text.strip()
-            generated_text = f"Assistant:\n{generated_text}"
-            score = compute_score(generated_text, ground_truth, format_score=0., score=1.)
+            if args.task_type == "countdown":
+                generated_text = f"Assistant:\n{generated_text}"
+                score = compute_score_countdown(generated_text, ground_truth, format_score=0., score=1.)
+            elif args.task_type == "math":
+                score = compute_score_math(generated_text, ground_truth)
+            else:
+                raise ValueError(f"Unknown task type {args.task_type}")
 
             result_record = {
                 "index": index,
