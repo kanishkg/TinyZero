@@ -30,16 +30,28 @@ all_ds_names = [
     # 'obiwan96/obiwan96open_web_math_raw_115000_160000',
     # 'obiwan96/obiwan96open_web_math_raw_160000_200000',
     # 'obiwan96/obiwan96open_web_math_raw_30000_70000',
-    'obiwan96/obiwan96finemath_raw_v3_0_25000',
-    'obiwan96/obiwan96finemath_raw_v3_25000_50000',
-    'obiwan96/obiwan96finemath_raw_v3_50000_75000',
-    'obiwan96/obiwan96finemath_raw_v3__75000_100000',
-    'obiwan96/obiwan96finemath_raw_v3__100000_125000',
-    'obiwan96/obiwan96finemath_raw_v3__125000_150000',
-    'obiwan96/obiwan96finemath_raw_v3__150000_175000',
-    'obiwan96/obiwan96finemath_raw_v3__175000_200000',
+# finemath
+    # 'obiwan96/obiwan96finemath_raw_v3_0_25000',
+    # 'obiwan96/obiwan96finemath_raw_v3_25000_50000',
+    # 'obiwan96/obiwan96finemath_raw_v3_50000_75000',
+    # 'obiwan96/obiwan96finemath_raw_v3__75000_100000',
+    # 'obiwan96/obiwan96finemath_raw_v3__100000_125000',
+    # 'obiwan96/obiwan96finemath_raw_v3__125000_150000',
+    # 'obiwan96/obiwan96finemath_raw_v3__150000_175000',
+    # 'obiwan96/obiwan96finemath_raw_v3__175000_200000',
+# owm
+    'obiwan96/obiwan96owm_raw_v3__0_20000',
+    'obiwan96/obiwan96owm_raw_v3__20000_40000',
+    'obiwan96/obiwan96owm_raw_v3__40000_60000',
+    'obiwan96/obiwan96owm_raw_v3__60000_80000',
+    'obiwan96/obiwan96owm_raw_v3__80000_100000',
+    'obiwan96/obiwan96owm_raw_v3__100000_120000',
+    'obiwan96/obiwan96owm_raw_v3__120000_140000',
+    'obiwan96/obiwan96owm_raw_v3__140000_160000',
+    'obiwan96/obiwan96owm_raw_v3__160000_180000',
+    'obiwan96/obiwan96owm_raw_v3__180000_200000',
 ]
     
 all_ds = [datasets.load_dataset(ds_name, split='train') for ds_name in all_ds_names]
 all_ds = datasets.concatenate_datasets(all_ds)
-all_ds.push_to_hub('obiwan96/finemath_raw_v3_0_200000')
+all_ds.push_to_hub('obiwan96/owm_raw_v3_0_200000')
