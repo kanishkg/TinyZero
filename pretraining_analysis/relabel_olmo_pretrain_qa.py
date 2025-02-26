@@ -127,6 +127,7 @@ Make sure that the question, thoughts and answer are in the text.
 Paraphrase the answer so that the answer is cleaned up. Make sure that the answer has steps to find the solution.    
 Write the question in <question>...</question>.
 Write the process in <thoughts>steps to find the solution</thoughts> and the final answer in <answer>...</answer>.
+Make sure the number of words in the thoughts section matches the solution in the text.
 
 Now do it for this text:""",
 }
@@ -150,9 +151,9 @@ Now do it for this text:""",
         ds = ds.select(range(args.start, args.end))
     
     # filter examples where 'contain_problem' is no or 'contain_solution' is no
-    if args.dataset_name == 'openwebmath' or args.dataset_name == 'openwebmath_backtrack':
-        ds = ds.filter(lambda x: x['contain_problem'] != 'no' and x['contain_solution'] != 'no')
-        print(f"Number of examples after filtering: {len(ds)}")
+    # if args.dataset_name == 'openwebmath' or args.dataset_name == 'openwebmath_backtrack':
+    #     ds = ds.filter(lambda x: x['contain_problem'] != 'no' and x['contain_solution'] != 'no')
+    #     print(f"Number of examples after filtering: {len(ds)}")
 
     llm = LLM(
         model='Qwen/Qwen2.5-32B-Instruct',
@@ -207,7 +208,7 @@ Now do it for this text:""",
                 suffix = f'_{args.start}_{args.end}'
             else:
                 suffix = ''
-            ds_out_name = f'{args.user}open_web_math_backtrack_40k_{suffix}'
+            ds_out_name = f'owm_nonev4_{suffix}'
             ds_so_far.push_to_hub(ds_out_name)
         except Exception as e:
             print(f'Error saving dataset: {e}')
@@ -219,7 +220,7 @@ Now do it for this text:""",
             suffix = f'_{args.start}_{args.end}'
         else:
             suffix = ''
-        ds_out_name = f'{args.user}open_web_math_backtrack_40k_{suffix}'
+        ds_out_name = f'owm_nonev4_{suffix}'
         ds_so_far.push_to_hub(ds_out_name)
     except Exception as e:
         print(f'Final error saving dataset: {e}')
