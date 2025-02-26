@@ -47,6 +47,10 @@ data_names = [
     'obiwan96/obiwan96open_web_math_qav3_none_80000_100000',
     'obiwan96/obiwan96open_web_math_qav3_none_100000_120000',
     'obiwan96/obiwan96open_web_math_qav3_none_120000_140000',
+    'obiwan96/obiwan96open_web_math_qav3_none_140000_155000',
+    'obiwan96/obiwan96open_web_math_qav3_none_155000_170000',
+    'obiwan96/obiwan96open_web_math_qav3_none_170000_185000',
+    'obiwan96/obiwan96open_web_math_qav3_none_185000_200000',
 ]
 all_ds = []
 for data_name in data_names:
