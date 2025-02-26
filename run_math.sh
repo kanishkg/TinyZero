@@ -40,5 +40,5 @@ fi
 
 TASK_TYPE="math"
 
-echo "Processing only_backtracking_backward_ppo with task-type: ${TASK_TYPE}..."
+echo "Processing owm-method with task-type: ${TASK_TYPE}..."
 process_model "only_backtracking_backward_ppo" "${TASK_TYPE}"
