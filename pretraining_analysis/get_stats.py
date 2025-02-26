@@ -1,6 +1,6 @@
 import datasets
 
-dataset_name = 'obiwan96/finemath_raw_v3_0_200000'
+dataset_name = 'obiwan96/finemath_processed_v3_0_200000'
 ds = datasets.load_dataset(dataset_name, split='train')
 
 num_samples = len(ds)
