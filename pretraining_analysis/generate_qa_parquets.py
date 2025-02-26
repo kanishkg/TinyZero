@@ -106,7 +106,7 @@ for i, l in enumerate(lens):
     else:
         break
 
-ds['train'] = ds['train'].select(keep_idx)
+ds = ds.select(keep_idx)
 print(f"Kept {len(keep_idx)} examples with total {cumsum} tokens")
 
 ds_out_name = 'obiwan96/obiwan96open_web_math_qav3'
