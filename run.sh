@@ -13,7 +13,7 @@ process_model() {
     
     mkdir -p "${output_base}"
     
-    for step in $(seq 10 10 250); do
+    for step in $(seq 0 10 250); do
         local ckpt_path="${ckpt_base}/global_step_${step}"
         if [ ! -d "${ckpt_path}" ]; then
             echo "Checkpoint not found: ${ckpt_path}, skipping..."
