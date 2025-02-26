@@ -9,7 +9,7 @@ import re
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--dataset_name', type=str, default='openwebmath_backtrack', help='Dataset name')
+parser.add_argument('--dataset_name', type=str, default='openwebmath_none', help='Dataset name')
 parser.add_argument('--start', type=int, default=-1, help='Shard to process')
 parser.add_argument('--end', type=int, default=-1, help='Number of shards to process')
 parser.add_argument('--split', type=str, default='train', help='Split to process')
@@ -31,7 +31,7 @@ def get_prompts(ds, tokenizer, prompt_templates):
             samples += [ds['text'][e]]
 
     for example in tqdm(samples, desc="Generating prompts"):
-        prompt = prompt_templates['qa3'] + f"\n<text>\n{example}\n</text>"
+        prompt = prompt_templates['qa_none'] + f"\n<text>\n{example}\n</text>"
         prompt = [{'role': 'user', 'content': prompt}, {'role': 'assistant', 'content': ''}]
         prompts += [prompt]
   
@@ -137,6 +137,8 @@ Now do it for this text:""",
         ds = datasets.load_dataset('Asap7772/open-web-math-none-processed-v2', num_proc=os.cpu_count()-2, split=args.split)
     elif args.dataset_name == 'openwebmath_backtrack':
         ds = datasets.load_dataset('Asap7772/open-web-math-backtrack-processed-v2', num_proc=os.cpu_count()-2, split=args.split)
+    elif args.dataset_name == 'openwebmath_none':
+        ds = datasets.load_dataset('Asap7772/open-web-math-none-processed-v2', num_proc=os.cpu_count()-2, split=args.split)
     else:
         raise ValueError(f"Unknown dataset name: {args.dataset_name}")
         
