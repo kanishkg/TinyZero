@@ -39,18 +39,40 @@ data_names = [
     # 'obiwan96/obiwan96open_web_math_qav3_150000_200000',
     # 'obiwan96/obiwan96open_web_math_qav3_0_50000',
     # 'obiwan96/obiwan96open_web_math_qav3_100000_150000',
-    'obiwan96/obiwan96open_web_math_qav3_none_0_15000',
-    'obiwan96/obiwan96open_web_math_qav3_none_15000_30000',
-    'obiwan96/obiwan96open_web_math_qav3_none_30000_45000',
-    'obiwan96/obiwan96open_web_math_qav3_none_45000_60000',
-    'obiwan96/obiwan96open_web_math_qav3_none_60000_80000',
-    'obiwan96/obiwan96open_web_math_qav3_none_80000_100000',
-    'obiwan96/obiwan96open_web_math_qav3_none_100000_120000',
-    'obiwan96/obiwan96open_web_math_qav3_none_120000_140000',
-    'obiwan96/obiwan96open_web_math_backtrack_40k__140000_155000',
-    'obiwan96/obiwan96open_web_math_backtrack_40k__155000_170000',
-    'obiwan96/obiwan96open_web_math_backtrack_40k__170000_185000',
-    'obiwan96/obiwan96open_web_math_backtrack_40k__185000_200000',
+    # 'obiwan96/obiwan96open_web_math_qav3_none_0_15000',
+    # 'obiwan96/obiwan96open_web_math_qav3_none_15000_30000',
+    # 'obiwan96/obiwan96open_web_math_qav3_none_30000_45000',
+    # 'obiwan96/obiwan96open_web_math_qav3_none_45000_60000',
+    # 'obiwan96/obiwan96open_web_math_qav3_none_60000_80000',
+    # 'obiwan96/obiwan96open_web_math_qav3_none_80000_100000',
+    # 'obiwan96/obiwan96open_web_math_qav3_none_100000_120000',
+    # 'obiwan96/obiwan96open_web_math_qav3_none_120000_140000',
+    # 'obiwan96/obiwan96open_web_math_backtrack_40k__140000_155000',
+    # 'obiwan96/obiwan96open_web_math_backtrack_40k__155000_170000',
+    # 'obiwan96/obiwan96open_web_math_backtrack_40k__170000_185000',
+    # 'obiwan96/obiwan96open_web_math_backtrack_40k__185000_200000',
+    'obiwan96/obiwan96owm_nonev4__0_20000',
+    'obiwan96/obiwan96owm_nonev4__20000_40000',
+    'obiwan96/obiwan96owm_nonev4__40000_60000',
+    'obiwan96/obiwan96owm_nonev4__60000_80000',
+    'obiwan96/obiwan96owm_nonev4__80000_100000',
+    'obiwan96/obiwan96owm_nonev4__100000_120000',
+    'obiwan96/obiwan96owm_nonev4__120000_140000',
+    'obiwan96/obiwan96owm_nonev4__140000_160000',
+    'obiwan96/obiwan96owm_nonev4__160000_180000',
+    'obiwan96/obiwan96owm_nonev4__180000_200000',
+    'obiwan96/obiwan96owm_nonev4__200000_220000',
+    'obiwan96/obiwan96owm_nonev4__220000_240000',
+    'obiwan96/obiwan96owm_nonev4__240000_260000',
+    'obiwan96/obiwan96owm_nonev4__260000_280000',
+    'obiwan96/obiwan96owm_nonev4__280000_300000',
+    'obiwan96/obiwan96owm_nonev4__300000_320000',
+    'obiwan96/obiwan96owm_nonev4__320000_340000',
+    'obiwan96/obiwan96owm_nonev4__340000_360000',
+    'obiwan96/obiwan96owm_nonev4__360000_380000',
+    'obiwan96/obiwan96owm_nonev4__380000_400000',
+    'obiwan96/obiwan96owm_nonev4__400000_420000',
+    'obiwan96/obiwan96owm_nonev4__420000_440000',
 ]
 all_ds = []
 for data_name in data_names:
@@ -98,7 +120,7 @@ print(f"Median query length: {np.median(query_lens)}")
 print(f"Total query tokens: {sum(query_lens)}")
 print(f"Number of queries: {len(query_lens)}")
 
-target_len = 9800000
+target_len = 110000000
 cumsum = 0
 keep_idx = []
 for i, l in enumerate(lens):
