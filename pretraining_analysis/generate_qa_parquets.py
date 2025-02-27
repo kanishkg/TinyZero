@@ -120,7 +120,7 @@ print(f"Median query length: {np.median(query_lens)}")
 print(f"Total query tokens: {sum(query_lens)}")
 print(f"Number of queries: {len(query_lens)}")
 
-target_len = 110000000
+target_len = 114000000
 cumsum = 0
 keep_idx = []
 for i, l in enumerate(lens):
@@ -146,12 +146,12 @@ print(f"Median length: {np.median(lens)}")
 print(f"Total tokens: {sum(lens)}")
 print(f"Number of completions: {len(lens)}")
 
-ds_out_name = 'obiwan96/obiwan96open_web_math_qav3'
+ds_out_name = 'obiwan96/owm_nonev4'
 ds = ds.train_test_split(test_size=0.05)
 ds.push_to_hub(ds_out_name)
 
 # save as train.parquet and test.parquet
-if not os.path.exists('/home/kanishk/ba/owm_mathv3_none'):
-    os.makedirs('/home/kanishk/ba/owm_mathv3_none')
-ds['train'].to_parquet('/home/kanishk/ba/owm_mathv3_none/train.parquet')
-ds['test'].to_parquet('/home/kanishk/ba/owm_mathv3_none/test.parquet')
+if not os.path.exists('/home/kanishk/ba/owm_mathv4_none'):
+    os.makedirs('/home/kanishk/ba/owm_mathv4_none')
+ds['train'].to_parquet('/home/kanishk/ba/owm_mathv4_none/train.parquet')
+ds['test'].to_parquet('/home/kanishk/ba/owm_mathv4_none/test.parquet')
