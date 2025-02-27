@@ -1,7 +1,7 @@
 import datasets
 from transformers import AutoTokenizer
 import os
-
+import numpy as np
 tokenizer = AutoTokenizer.from_pretrained('meta-llama/Llama-3.2-3B')
 tokenizer.pad_token = tokenizer.eos_token
 tokenizer.pad_token_id = tokenizer.eos_token_id
@@ -59,11 +59,10 @@ def map_fn(example):
     
 
 ds = ds.map(map_fn, num_proc=os.cpu_count())
-train_completion = ds['completion']
+train_completion = ds['train']['completion']
 tokenizer = AutoTokenizer.from_pretrained('meta-llama/Llama-3.1-8B')
 tokens = tokenizer(train_completion)
 lens = [len(t) for t in tokens['input_ids']]
-import numpy as np
 print(f"Max length: {max(lens)}")
 print(f"Min length: {min(lens)}")
 print(f"Mean length: {np.mean(lens)}")
