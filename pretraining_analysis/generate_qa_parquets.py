@@ -151,7 +151,7 @@ ds = ds.train_test_split(test_size=0.05)
 ds.push_to_hub(ds_out_name)
 
 # save as train.parquet and test.parquet
-if not os.path.exists('/home/kanishk/ba/owm_mathv4_none'):
-    os.makedirs('/home/kanishk/ba/owm_mathv4_none')
-ds['train'].to_parquet('/home/kanishk/ba/owm_mathv4_none/train.parquet')
-ds['test'].to_parquet('/home/kanishk/ba/owm_mathv4_none/test.parquet')
+if not os.path.exists('/home/kanishk/ba/data/owm_mathv4_none'):
+    os.makedirs('/home/kanishk/ba/data/owm_mathv4_none')
+ds['train'].to_parquet('/home/kanishk/ba/data/owm_mathv4_none/train.parquet')
+ds['test'].to_parquet('/home/kanishk/ba/data/owm_mathv4_none/test.parquet')
