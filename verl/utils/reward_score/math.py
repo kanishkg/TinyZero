@@ -39,15 +39,15 @@ def extract_solution(solution_str):
         final_answer = None
     return final_answer
 
-def compute_score(solution_str, ground_truth, answer_type='answer_tag') -> float:
+def compute_score(solution_str, ground_truth, answer_type='answer_tag', format_score=0., score=1.) -> float:
     if answer_type == 'answer_tag':
-        return compute_score_answer_tag(solution_str, ground_truth)
+        return compute_score_answer_tag(solution_str, ground_truth, format_score=0., score=1.)
     elif answer_type == 'boxed':
-        return compute_score_boxed(solution_str, ground_truth)
+        return compute_score_boxed(solution_str, ground_truth, format_score=0., score=1.)
     else:
         raise ValueError(f"Unknown answer type {answer_type}")
 
-def compute_score_answer_tag(solution_str, ground_truth) -> float:
+def compute_score_answer_tag(solution_str, ground_truth, format_score=0., score=1.) -> float:
     retval = 0.
     
     equation = extract_solution(solution_str=solution_str)
@@ -76,24 +76,24 @@ def compute_score_answer_tag(solution_str, ground_truth) -> float:
         equation = old_equation
     
     # now evaluate the equation
-    retval = 0.1 # format_score
+    retval = format_score # format_score
     try:
         if is_equiv_any(ground_truth, equation):
-            retval = 1.
+            retval = score
     except Exception as e:
         print(e)
         
     return retval
 
-def compute_score_boxed(solution_str, ground_truth) -> float:
+def compute_score_boxed(solution_str, ground_truth, format_score=0., score=1.) -> float:
     retval = 0.
     try:
         answer = MathEvaluator.get_answer_expr(solution_str)
         if answer is not None:
             if is_equiv_any(ground_truth, answer):
-                retval = 1.
+                retval = score
             elif answer is not None and answer != "":
-                retval = 0.1 # format_score
+                retval = format_score
     except Exception as e:
         print(e)
 

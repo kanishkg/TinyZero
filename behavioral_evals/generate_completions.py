@@ -105,7 +105,7 @@ def main():
                 generated_text = f"Assistant:\n{generated_text}"
                 score = compute_score_countdown(generated_text, ground_truth, format_score=0., score=1.)
             elif args.task_type == "math":
-                score = compute_score_math(generated_text, ground_truth)
+                score = compute_score_math(generated_text, ground_truth, format_score=0., score=1.)
             else:
                 raise ValueError(f"Unknown task type {args.task_type}")
 
