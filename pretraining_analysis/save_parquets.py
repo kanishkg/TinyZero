@@ -27,7 +27,7 @@ def filter_fn(example):
     if query_len > max_tokens - margin_tokens:
         return False
     return True
-# ds = ds.filter(filter_fn, num_proc=os.cpu_count())
+ds = ds.filter(filter_fn, num_proc=os.cpu_count())
 
 def map_fn(example):
     curr_query = example['query']
@@ -59,6 +59,7 @@ def map_fn(example):
     
 
 ds = ds.map(map_fn, num_proc=os.cpu_count())
+ds = ds.filter(filter_fn, num_proc=os.cpu_count())
 train_completion = ds['train']['completion']
 tokenizer = AutoTokenizer.from_pretrained('meta-llama/Llama-3.1-8B')
 tokens = tokenizer(train_completion)
