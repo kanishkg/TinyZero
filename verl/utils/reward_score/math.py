@@ -108,6 +108,12 @@ def is_equiv_any(gold, answer) -> bool:
             return True
     return False
 
+def get_answer_boxed(s):
+    try:
+        return MathEvaluator.get_answer_expr(s)
+    except Exception as e:
+        return ''
+
 # TODO: Figure out why math_verify can't be installed
 def is_equiv_mathverify(gold, answer) -> bool:
     from math_verify import parse, verify

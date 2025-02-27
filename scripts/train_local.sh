@@ -7,25 +7,23 @@ export WANDB_API_KEY=a393f29dee9351c0a8c4e410e626e20733564d26
 export WANDB_USERNAME=gurpreetkaur94539
 export WANDB_USER_EMAIL=gurpreetkaur94539gmail.com
 export WANDB__SERVICE_WAIT=300
+export WANDB_ENTITY=cocolab
 export HF_DATASETS_CACHE=$hf_cache_dir
 export HF_TOKEN='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'
 
 models=(
-    /home/anikait.singh/rl_behaviors/sft/sft-Qwen2.5-3B-rag_ai2_sft-method-5-1e-6-exp1/global_step_465
-    Qwen/Qwen2.5-3B
-    Qwen/Qwen2.5-3B-Instruct
-    meta-llama/Llama-3.2-3B-Instruct
+    /home/anikait.singh/rl_behaviors/sft/sft-Llama-3.2-3B-open_web_math_backtrack_40k_sft-method-2-1e-5-exp0/global_step_280
+    /home/anikait.singh/rl_behaviors/sft/sft-Llama-3.2-3B-open_web_math_backtrack_40k_sft-method-5-1e-6-exp3/global_step_700
 )
 num_models=${#models[@]}
 names=(
-    math-qwen3b-sft-hints
-    math-qwen3b-base-hints
-    math-qwen3b-instruct-hints
-    math-llama3b-instruct-hints
+    math-llama3b-backtrack40k-1e5
+    math-llama3b-backtrack40k-1e6
 )
 num_names=${#names[@]}
 # data_dir="/home/anikait.singh/rl_behaviors/data_countdown"
-data_dir='/home/anikait.singh/rl_behaviors/data_math_hint'
+data_dir='/home/anikait.singh/rl_behaviors/data_math'
+# data_dir='/home/anikait.singh/rl_behaviors/data_math_hint'
 
 if [ ! -d $data_dir ]; then
     echo "Data directory does not exist"
@@ -33,8 +31,6 @@ if [ ! -d $data_dir ]; then
 fi
 
 gpus=(
-    "0,1,2,3,4,5,6,7"
-    "0,1,2,3,4,5,6,7"
     "0,1,2,3,4,5,6,7"
     "0,1,2,3,4,5,6,7"
 )
@@ -62,6 +58,7 @@ for i in $(seq 0 $((num_models-1))); do
         exp_num=$((exp_num+1))
         continue
     fi
+
 
     export N_GPUS=8
     export BASE_MODEL=${models[$i]}
