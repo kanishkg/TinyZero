@@ -127,7 +127,7 @@ Make sure that the question, thoughts and answer are in the text.
 Paraphrase the answer so that the answer is cleaned up. Make sure that the answer has steps to find the solution.    
 Write the question in <question>...</question>.
 Write the process in <thoughts>steps to find the solution</thoughts> and the final answer in <answer>...</answer>.
-Make sure the number of words in the thoughts section matches the solution in the text.
+Use about 500 words for the thoughts section.
 
 Now do it for this text:""",
 }
