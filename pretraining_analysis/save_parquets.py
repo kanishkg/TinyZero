@@ -10,10 +10,17 @@ tokenizer.padding_side = 'right'
 max_tokens = 4096
 margin_tokens = 0
 
-ds = datasets.load_dataset('obiwan96/obiwan96open_web_math_qav3_none')
+ds = datasets.load_dataset('Asap7772/Asap7772open_web_math_backtrack_40k')
+if 'test' not in ds:
+    ds = ds['train'].train_test_split(test_size=0.1, seed=42)
 
 def filter_fn(example):
     curr_query = example['query']
+    curr_completion = example['completion']
+    
+    if not curr_query or not curr_completion: # skip empty queries or completions
+        return False
+    
     query_tok = tokenizer(curr_query, truncation=True, max_length=max_tokens-margin_tokens)
     query_len = len(query_tok['input_ids'])
     
@@ -51,7 +58,9 @@ def map_fn(example):
     return example
     
 ds = ds.map(map_fn, num_proc=os.cpu_count())
-ds.push_to_hub('Asap7772/obiwan96open_web_math_qav3_none')
+# ds.push_to_hub('Asap7772/obiwan96open_web_math_qav3_none')
+ds.push_to_hub('Asap7772/open_web_math_backtrack_40k_sft')
 
-ds['train'].to_parquet('/home/anikait.singh/rl_behaviors/cot_datasets/data_math_qv3/method/train.parquet')
-ds['test'].to_parquet('/home/anikait.singh/rl_behaviors/cot_datasets/data_math_qv3/method/test.parquet')
+os.system('mkdir -p /home/anikait.singh/rl_behaviors/cot_datasets/open_web_math_backtrack_40k_sft/method/')
+ds['train'].to_parquet('/home/anikait.singh/rl_behaviors/cot_datasets/open_web_math_backtrack_40k_sft/method/train.parquet')
+ds['test'].to_parquet('/home/anikait.singh/rl_behaviors/cot_datasets/open_web_math_backtrack_40k_sft/method/test.parquet')
