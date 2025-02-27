@@ -7,7 +7,7 @@ tokenizer.pad_token = tokenizer.eos_token
 tokenizer.pad_token_id = tokenizer.eos_token_id
 tokenizer.padding_side = 'right'
 
-max_tokens = 4096
+max_tokens = 4090
 margin_tokens = 0
 
 ds = datasets.load_dataset('obiwan96/owm_nonev4')
@@ -57,7 +57,19 @@ def map_fn(example):
     
     return example
     
+
 ds = ds.map(map_fn, num_proc=os.cpu_count())
+train_completion = ds['completion']
+tokenizer = AutoTokenizer.from_pretrained('meta-llama/Llama-3.1-8B')
+tokens = tokenizer(train_completion)
+lens = [len(t) for t in tokens['input_ids']]
+import numpy as np
+print(f"Max length: {max(lens)}")
+print(f"Min length: {min(lens)}")
+print(f"Mean length: {np.mean(lens)}")
+print(f"Median length: {np.median(lens)}")
+print(f"Total tokens: {sum(lens)}")
+print(f"Number of completions: {len(lens)}")
 ds.push_to_hub('obiwan96/owm_nonev4_sft')
 
 os.system('mkdir -p /home/kanishk/ba/data/owm_nonev4/')
