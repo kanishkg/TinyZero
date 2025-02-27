@@ -1,19 +1,26 @@
 import datasets
 from transformers import AutoTokenizer
 import os
-
+import numpy as np
 tokenizer = AutoTokenizer.from_pretrained('meta-llama/Llama-3.2-3B')
 tokenizer.pad_token = tokenizer.eos_token
 tokenizer.pad_token_id = tokenizer.eos_token_id
 tokenizer.padding_side = 'right'
 
-max_tokens = 4096
+max_tokens = 4090
 margin_tokens = 0
 
-ds = datasets.load_dataset('obiwan96/obiwan96open_web_math_qav3_none')
+ds = datasets.load_dataset('obiwan96/owm_nonev4')
+if 'test' not in ds:
+    ds = ds['train'].train_test_split(test_size=0.1, seed=42)
 
 def filter_fn(example):
     curr_query = example['query']
+    curr_completion = example['completion']
+    
+    if not curr_query or not curr_completion: # skip empty queries or completions
+        return False
+    
     query_tok = tokenizer(curr_query, truncation=True, max_length=max_tokens-margin_tokens)
     query_len = len(query_tok['input_ids'])
     
@@ -50,8 +57,21 @@ def map_fn(example):
     
     return example
     
-ds = ds.map(map_fn, num_proc=os.cpu_count())
-ds.push_to_hub('Asap7772/obiwan96open_web_math_qav3_none')
 
-ds['train'].to_parquet('/home/anikait.singh/rl_behaviors/cot_datasets/data_math_qv3/method/train.parquet')
-ds['test'].to_parquet('/home/anikait.singh/rl_behaviors/cot_datasets/data_math_qv3/method/test.parquet')
+ds = ds.map(map_fn, num_proc=os.cpu_count())
+ds = ds.filter(filter_fn, num_proc=os.cpu_count())
+train_completion = ds['train']['completion']
+tokenizer = AutoTokenizer.from_pretrained('meta-llama/Llama-3.1-8B')
+tokens = tokenizer(train_completion)
+lens = [len(t) for t in tokens['input_ids']]
+print(f"Max length: {max(lens)}")
+print(f"Min length: {min(lens)}")
+print(f"Mean length: {np.mean(lens)}")
+print(f"Median length: {np.median(lens)}")
+print(f"Total tokens: {sum(lens)}")
+print(f"Number of completions: {len(lens)}")
+ds.push_to_hub('obiwan96/owm_nonev4_sft')
+
+os.system('mkdir -p /home/kanishk/ba/data/owm_nonev4/')
+ds['train'].to_parquet('/home/kanishk/ba/data/owm_nonev4/train.parquet')
+ds['test'].to_parquet('/home/kanishk/ba/data/owm_nonev4/test.parquet')

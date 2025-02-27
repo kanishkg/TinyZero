@@ -7,12 +7,13 @@ export WANDB_API_KEY=a393f29dee9351c0a8c4e410e626e20733564d26
 export WANDB_USERNAME=gurpreetkaur94539
 export WANDB_USER_EMAIL=gurpreetkaur94539gmail.com
 export WANDB__SERVICE_WAIT=300
-# export WANDB_ENTITY=cocolab
+export WANDB_ENTITY=cocolab
 export HF_DATASETS_CACHE=$hf_cache_dir
 export HF_TOKEN='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'
 
 base_data_paths=(
-  /home/anikait.singh/rl_behaviors/cot_datasets/rag_ai2_sft
+  # /home/anikait.singh/rl_behaviors/cot_datasets/rag_ai2_sft
+  /home/anikait.singh/rl_behaviors/cot_datasets/open_web_math_backtrack_40k_sft
 )
 
 # List of dataset conditions
@@ -21,12 +22,13 @@ conditions=(
 )
 
 model_names=(
-  Qwen/Qwen2.5-3B
+  # Qwen/Qwen2.5-3B
+  meta-llama/Llama-3.2-3B
 )
 
 epochs=(
+  2
   5
-  10
 )
 
 lrs=(
@@ -43,7 +45,7 @@ train_batch_size=80
 max_length=4096
 default_hdfs_dir="/home/anikait.singh/rl_behaviors/hdfs"
 default_local_dir="/home/anikait.singh/rl_behaviors/sft"
-project_name="math-ragai2-sft-0223"
+project_name="math-backtrack40k-sft-0223"
 logger="['console','wandb']"
 warmup_steps_ratio=0.05
 weight_decay=1e-4

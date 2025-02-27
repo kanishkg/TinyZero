@@ -55,7 +55,8 @@ def main():
     ckpt_dir = args.ckpt
     dataset_path = args.dataset
     dataset = load_dataset("parquet", data_files=dataset_path)['train']
-    dataset = dataset.select(range(args.num_samples))
+    if args.task_type == "math":
+        dataset = dataset.select(range(args.num_samples))
 
     sampling_params = SamplingParams(
         max_tokens=1024 if args.task_type == "countdown" else 2048,

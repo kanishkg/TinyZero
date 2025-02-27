@@ -155,7 +155,7 @@ def map_fn_subgoal(examples):
             
     return ret_dict
 
-dataset_name = 'obiwan96/open_web_math_raw_v3_0_200000'
+dataset_name = 'obiwan96/owm_raw_v3_0_200000'
 ds = datasets.load_dataset(dataset_name, split='train')
 
 # Apply the mapping functions
@@ -164,7 +164,7 @@ ds = ds.map(map_fn_backchain, batched=True, remove_columns=ds.column_names, num_
 ds = ds.map(map_fn_verification, batched=True, remove_columns=ds.column_names, num_proc=64)
 ds = ds.map(map_fn_subgoal, batched=True, remove_columns=ds.column_names, num_proc=64)
 
-ds.push_to_hub('obiwan96/open_web_math_raw_v3_0_200000_processed')
+ds.push_to_hub('obiwan96/owm_processed_v3_0_200000')
 
 
 

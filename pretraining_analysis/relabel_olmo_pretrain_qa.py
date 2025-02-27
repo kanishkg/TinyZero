@@ -9,7 +9,7 @@ import re
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument('--dataset_name', type=str, default='openwebmath_backtrack', help='Dataset name')
+parser.add_argument('--dataset_name', type=str, default='openwebmath_none', help='Dataset name')
 parser.add_argument('--start', type=int, default=-1, help='Shard to process')
 parser.add_argument('--end', type=int, default=-1, help='Number of shards to process')
 parser.add_argument('--split', type=str, default='train', help='Split to process')
@@ -31,7 +31,7 @@ def get_prompts(ds, tokenizer, prompt_templates):
             samples += [ds['text'][e]]
 
     for example in tqdm(samples, desc="Generating prompts"):
-        prompt = prompt_templates['qa3'] + f"\n<text>\n{example}\n</text>"
+        prompt = prompt_templates['qa_none'] + f"\n<text>\n{example}\n</text>"
         prompt = [{'role': 'user', 'content': prompt}, {'role': 'assistant', 'content': ''}]
         prompts += [prompt]
   
@@ -127,6 +127,7 @@ Make sure that the question, thoughts and answer are in the text.
 Paraphrase the answer so that the answer is cleaned up. Make sure that the answer has steps to find the solution.    
 Write the question in <question>...</question>.
 Write the process in <thoughts>steps to find the solution</thoughts> and the final answer in <answer>...</answer>.
+Use about 500 words for the thoughts section.
 
 Now do it for this text:""",
 }
@@ -137,6 +138,8 @@ Now do it for this text:""",
         ds = datasets.load_dataset('Asap7772/open-web-math-none-processed-v2', num_proc=os.cpu_count()-2, split=args.split)
     elif args.dataset_name == 'openwebmath_backtrack':
         ds = datasets.load_dataset('Asap7772/open-web-math-backtrack-processed-v2', num_proc=os.cpu_count()-2, split=args.split)
+    elif args.dataset_name == 'openwebmath_none':
+        ds = datasets.load_dataset('Asap7772/open-web-math-none-processed-v2', num_proc=os.cpu_count()-2, split=args.split)
     else:
         raise ValueError(f"Unknown dataset name: {args.dataset_name}")
         
@@ -148,9 +151,9 @@ Now do it for this text:""",
         ds = ds.select(range(args.start, args.end))
     
     # filter examples where 'contain_problem' is no or 'contain_solution' is no
-    if args.dataset_name == 'openwebmath' or args.dataset_name == 'openwebmath_backtrack':
-        ds = ds.filter(lambda x: x['contain_problem'] != 'no' and x['contain_solution'] != 'no')
-        print(f"Number of examples after filtering: {len(ds)}")
+    # if args.dataset_name == 'openwebmath' or args.dataset_name == 'openwebmath_backtrack':
+    #     ds = ds.filter(lambda x: x['contain_problem'] != 'no' and x['contain_solution'] != 'no')
+    #     print(f"Number of examples after filtering: {len(ds)}")
 
     llm = LLM(
         model='Qwen/Qwen2.5-32B-Instruct',
@@ -205,7 +208,7 @@ Now do it for this text:""",
                 suffix = f'_{args.start}_{args.end}'
             else:
                 suffix = ''
-            ds_out_name = f'{args.user}open_web_math_backtrack_40k_{suffix}'
+            ds_out_name = f'owm_nonev4_{suffix}'
             ds_so_far.push_to_hub(ds_out_name)
         except Exception as e:
             print(f'Error saving dataset: {e}')
@@ -217,7 +220,7 @@ Now do it for this text:""",
             suffix = f'_{args.start}_{args.end}'
         else:
             suffix = ''
-        ds_out_name = f'{args.user}open_web_math_backtrack_40k_{suffix}'
+        ds_out_name = f'owm_nonev4_{suffix}'
         ds_so_far.push_to_hub(ds_out_name)
     except Exception as e:
         print(f'Final error saving dataset: {e}')
