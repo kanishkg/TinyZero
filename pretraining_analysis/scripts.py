@@ -1,5 +1,6 @@
 import argparse
 import os
+import subprocess
 
 # conda activate myenv; python /home/anikait.singh/TinyZero/pretraining_analysis/scripts.py --node 0
 
@@ -7,7 +8,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--start', type=int, default=0,
                         help='Starting shard index (inclusive)')
-    parser.add_argument('--end', type=int, default=150000,
+    parser.add_argument('--end', type=int, default=20000,
                         help='Ending shard index (exclusive)')
     parser.add_argument('--num_nodes', type=int, default=2,
                         help='Total number of nodes to use')
@@ -68,14 +69,13 @@ def main():
         curr_gpu = gpus[i]
         env_prefix = f'CUDA_VISIBLE_DEVICES={curr_gpu} '
         print(f'CUDA_VISIBLE_DEVICES={curr_gpu}')
-        suffix = ' &'
         command = (
             f'python /home/anikait.singh/TinyZero/pretraining_analysis/generate_hint_resp_vllm.py '
             f'--start {proc_start} --end {proc_end} --user {args.user} --save_every {args.save_every}'
         )
-        full_command = env_prefix + command + suffix
+        full_command = env_prefix + command
 
-        os.system(full_command)
+        subprocess.Popen(full_command, shell=True)
         
         print(f'Running command: {full_command}')
         print(f'Processing shards from {proc_start} to {proc_end}')

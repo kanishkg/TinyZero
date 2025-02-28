@@ -8,6 +8,7 @@ from transformers import AutoTokenizer
 import argparse
 import re
 import datasets
+from collections import defaultdict
 
 from verl.utils.reward_score.math_eval import MathEvaluator
 
@@ -21,8 +22,9 @@ def get_answer_boxed(s):
         return ''
 
 parser = argparse.ArgumentParser()
+parser.add_argument('--model_name', type=str, default="Qwen/Qwen2.5-32B-Instruct", help='Model name')
 parser.add_argument('--dataset_name', type=str, default='metamath-filtered', help='Dataset name')
-parser.add_argument('--output_name',  type=str, default='metamath-filtered-qwengen', help='Output name')
+parser.add_argument('--output_name',  type=str, default='metamath-filtered-qwen-gen', help='Output name')
 parser.add_argument('--start', type=int, default=-1, help='Shard to process')
 parser.add_argument('--end', type=int, default=-1, help='Number of shards to process')
 parser.add_argument('--split', type=str, default='train', help='Split to process')
@@ -34,9 +36,9 @@ parser.add_argument('--temperature', type=float, default=2.0, help='Sampling tem
 parser.add_argument('--top_p', type=int, default=1.0, help='Top k sampling')
 parser.add_argument('--min_p', type=float, default=0.3, help='Top p sampling')
 parser.add_argument('--user', type=str, default='Asap7772', help='User to push the dataset to')
-parser.add_argument('--n', type=int, default=64, help='Number of examples to generate')
+parser.add_argument('--n', type=int, default=16, help='Number of examples to generate')
 
-def get_prompts(ds, tokenizer, prompt_templates, max_length=4096, max_prompt_length=1024):
+def get_prompts(ds, tokenizer, max_length=4096, max_prompt_length=1024):
     prompts, answers, samples = [], [], []
     tokenized_inputs = tokenizer(ds['problem'])
     for e, example in tqdm(enumerate(tokenized_inputs['input_ids']), desc="Truncating prompts"):
@@ -49,18 +51,16 @@ def get_prompts(ds, tokenizer, prompt_templates, max_length=4096, max_prompt_len
         answers += [ds['answer'][e]]
 
     for example in tqdm(samples, desc="Generating prompts"):
-        prompt = prompt_templates['qa'].format(answer='{answer}', problem=example)
-        prompt = [{'role': 'user', 'content': prompt}, {'role': 'assistant', 'content': ''}]
+        prompt = [
+            {"role": "system", "content": "You are a helpful and harmless assistant. You are Qwen developed by Alibaba. You should think step-by-step."},
+            {"role": "user", "content": example}
+        ]
         prompts += [prompt]
   
-    new_prompts = [tokenizer.apply_chat_template(p,tokenize=False) for p in prompts]
+    new_prompts = [tokenizer.apply_chat_template(p,tokenize=False, add_generation_prompt=True) for p in prompts]
     return new_prompts, answers
 
 def main(args):
-    prompt_templates = {
-        'qa': "\n\nSolve the following math problem efficiently and clearly:\n\n- For simple problems (2 steps or fewer):\nProvide a concise solution with minimal explanation.\n\n- For complex problems (3 steps or more):\nUse this step-by-step format:\n\n## Step 1: [Concise description]\n[Brief explanation and calculations]\n\n## Step 2: [Concise description]\n[Brief explanation and calculations]\n\n...\n\nRegardless of the approach, always conclude with:\n\nTherefore, the final answer is: $\\boxed{answer}$. I hope it is correct.\n\nWhere [answer] is just the final number or expression that solves the problem.\n\nProblem: {problem}",
-    }
-
     if args.dataset_name == 'metamath-filtered':
         ds = datasets.load_dataset('active-reasoning/MetaMATH-filtered', num_proc=os.cpu_count()-2, split=args.split)
     else:
@@ -79,7 +79,7 @@ def main(args):
         print(f"Number of examples after filtering: {len(ds)}")
 
     llm = LLM(
-        model='Qwen/Qwen2.5-32B-Instruct',
+        model=args.model_name,
         tokenizer_mode="auto",
         max_num_seqs=64,
         enable_prefix_caching=True,
@@ -88,16 +88,19 @@ def main(args):
         gpu_memory_utilization=0.95,
         max_model_len=8192,
     )
-    tokenizer = AutoTokenizer.from_pretrained("Qwen/Qwen2.5-32B-Instruct")
+    tokenizer = AutoTokenizer.from_pretrained(args.model_name, trust_remote_code=True)
 
-    num_batches = math.ceil(len(ds) / args.save_every)
+    num_batches = max(math.ceil(len(ds) / args.save_every), 1)
+    print(f'Number of batches: {num_batches}')
+    print(f'Number of examples: {len(ds)}')
+    
     all_ds = []
     for shard_idx in tqdm(range(num_batches), desc='Shards'):
         batch_start = shard_idx * args.save_every
         batch_end = min((shard_idx + 1) * args.save_every, len(ds))
         
         curr_batch = ds.select(range(batch_start, batch_end))
-        prompts, answers = get_prompts(curr_batch, tokenizer, prompt_templates, max_length=args.max_length, max_prompt_length=args.max_prompt_length)
+        prompts, answers = get_prompts(curr_batch, tokenizer, max_length=args.max_length, max_prompt_length=args.max_prompt_length)
         sampling_params = SamplingParams(
             max_tokens=args.max_length,
             top_p=args.top_p,
@@ -107,30 +110,30 @@ def main(args):
         )
 
         responses = llm.generate(prompts, sampling_params=sampling_params)
-
-        outputs_dict = {
-            'query': [None] * len(curr_batch),
-            'completion': [None] * len(curr_batch),
-            'completion_answer': [None] * len(curr_batch),
-            'completion_correct': [None] * len(curr_batch),
-        }
         
+        outputs_dict = defaultdict(list)
         for i, response in enumerate(responses):
-            query = prompts[i]
-            output = response.outputs[0].text.strip()
-            output_answer = get_answer_boxed(output)
-            target_answer = get_answer_boxed(answers[i])
-            output_correct = is_equiv(target_answer, output_answer)
+            outputs, outputs_answer, outputs_correct = [], [], []
+            for j in range(args.n):
+                output = response.outputs[j].text.strip()
+                output_answer = get_answer_boxed(output)
+                target_answer = answers[i]
+                output_correct = is_equiv(target_answer, output_answer)
+                
+                outputs.append(output)
+                outputs_answer.append(output_answer)
+                outputs_correct.append(output_correct)
             
-            outputs_dict['query'][i] = query
-            outputs_dict['completion'][i] = output
-            outputs_dict['completion_answer'][i] = output_answer
-            outputs_dict['completion_correct'][i] = output_correct
+            outputs_success_rate = sum(outputs_correct) / len(outputs_correct)
+            outputs_dict['completion'].append(outputs)
+            outputs_dict['completion_answer'].append(outputs_answer)
+            outputs_dict['completion_correct'].append(outputs_correct)
+            outputs_dict['completion_succ_rate'].append(outputs_success_rate)
         
-        curr_batch = curr_batch.add_column('query', outputs_dict['query'])
         curr_batch = curr_batch.add_column('completion', outputs_dict['completion'])
         curr_batch = curr_batch.add_column('completion_answer', outputs_dict['completion_answer'])
         curr_batch = curr_batch.add_column('completion_correct', outputs_dict['completion_correct'])
+        curr_batch = curr_batch.add_column('completion_succ_rate', outputs_dict['completion_succ_rate'])
 
         all_ds.append(curr_batch)
         
